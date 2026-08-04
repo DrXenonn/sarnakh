@@ -1,0 +1,40 @@
+# Python
+.venv/
+__pycache__/
+
+# Secrets & sessions
+.env
+*.session
+
+# .NET
+bin/
+obj/
+*.user
+*.suo
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+
+# Logs
+logs/
+*.log
+
+# Environment / secrets (nested)
+appsettings.Development.json
+appsettings.Local.json
+telegram-playground/.env
+
+# Editor
+.vs/
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Publish
+publish/

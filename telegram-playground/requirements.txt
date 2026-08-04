@@ -1,0 +1,6 @@
+pyaes==1.6.1
+pyasn1==0.6.4
+python-dotenv==1.0.1
+redis==8.1.0
+rsa==4.9.1
+Telethon==1.44.0
