@@ -11,6 +11,8 @@ using OppMonitor.Api.Endpoints;
 using OppMonitor.Api.Jobs;
 using OppMonitor.Api.Services;
 using FluentValidation;
+using StackExchange.Redis;
+using System.Text.Json;
 
 // Serilog
 Log.Logger = new LoggerConfiguration()
@@ -23,6 +25,7 @@ Log.Logger = new LoggerConfiguration()
             rollingInterval: RollingInterval.Day,
             retainedFileCountLimit: 7)
     .CreateLogger();
+
 
 try
 {
@@ -64,38 +67,38 @@ try
     // o.MapEnum<Mood>("mood") later for using postgres enums.
 
     builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
-            {
-                options.Password.RequireDigit = false;
-                options.Password.RequireLowercase = false;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireUppercase = false;
-                options.Password.RequiredLength = 8;
-            })
+        {
+            options.Password.RequireDigit = false;
+            options.Password.RequireLowercase = false;
+            options.Password.RequireNonAlphanumeric = false;
+            options.Password.RequireUppercase = false;
+            options.Password.RequiredLength = 8;
+        })
         .AddEntityFrameworkStores<AppDbContext>();
 
     builder.Services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        })
     .AddJwtBearer(options =>
-            {
-                options.TokenValidationParameters.ValidIssuer = builder.Configuration["Jwt:Issuer"];
-                options.TokenValidationParameters.ValidAudience = builder.Configuration["Jwt:Audience"];
-                options.TokenValidationParameters.IssuerSigningKey =
-                    new SymmetricSecurityKey(
-                            System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]!));
+        {
+            options.TokenValidationParameters.ValidIssuer = builder.Configuration["Jwt:Issuer"];
+            options.TokenValidationParameters.ValidAudience = builder.Configuration["Jwt:Audience"];
+            options.TokenValidationParameters.IssuerSigningKey =
+                new SymmetricSecurityKey(
+                        System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SecretKey"]!));
 
-                options.Events.OnMessageReceived = context =>
+            options.Events.OnMessageReceived = context =>
+            {
+                var token = context.Request.Cookies["accessToken"];
+                if (!string.IsNullOrEmpty(token))
                 {
-                    var token = context.Request.Cookies["accessToken"];
-                    if (!string.IsNullOrEmpty(token))
-                    {
-                        context.Token = token;
-                    }
-                    return Task.CompletedTask;
-                };
-            });
+                    context.Token = token;
+                }
+                return Task.CompletedTask;
+            };
+        });
 
     builder.Services.AddAuthorization();
     builder.Services.AddOpenApi();
@@ -132,6 +135,24 @@ try
         {
             await roleManager.CreateAsync(new IdentityRole(Roles.Member));
         }
+    }
+
+    // Redis quick test — runs before the server starts
+    var redis = ConnectionMultiplexer.Connect("localhost:6379");
+    var dbRedis = redis.GetDatabase();
+    var json = dbRedis.ListLeftPop("telegram_results");
+
+    if (json.HasValue)
+    {
+        var result = JsonSerializer.Deserialize<JsonElement>(json.ToString());
+        var messages = result.GetProperty("messages");
+        Console.WriteLine($"Got {messages.GetArrayLength()} messages in this batch");
+        var randomMsg = messages[Random.Shared.Next(0, messages.GetArrayLength())];
+        Console.WriteLine($"Random message: {randomMsg}");
+    }
+    else
+    {
+        Console.WriteLine("No results found in telegram_results queue.");
     }
 
     app.UseAuthentication();

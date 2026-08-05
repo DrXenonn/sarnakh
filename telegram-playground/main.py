@@ -17,14 +17,14 @@ api_hash = os.getenv("API_HASH")
 COMMANDS_QUEUE = "telegram_commands"
 RESULTS_QUEUE = "telegram_results"
 BATCH_SIZE = 50
-BLOCK_TIMEOUT = 5  # seconds to block waiting for a command
+BLOCK_TIMEOUT = 5
 
 client = TelegramClient("session", api_id, api_hash)
-listening_tasks: dict[int, asyncio.Task] = {}  # group_id → live listener task
+listening_tasks: dict[int, asyncio.Task] = {}
 
 
-def push_result(result: dict):
-    r.rpush(RESULTS_QUEUE, json.dumps(result, ensure_ascii=False))
+def push_result(payload: dict):
+    r.rpush(RESULTS_QUEUE, json.dumps(payload, ensure_ascii=False))
 
 
 async def scan_historical(scan_id: str, group_id: int, days_back: int):
@@ -57,34 +57,38 @@ async def scan_historical(scan_id: str, group_id: int, days_back: int):
         })
 
         if len(batch) >= BATCH_SIZE:
-            push_result(scan_id=scan_id, messages=batch, done=False)
+            push_result({
+                "command": "scan_historical",
+                "scan_id": scan_id,
+                "messages": batch,
+                "done": False,
+            })
             total += len(batch)
             batch = []
 
     if batch:
         total += len(batch)
-        push_result(scan_id=scan_id, messages=batch, done=False)
+        push_result({
+            "command": "scan_historical",
+            "scan_id": scan_id,
+            "messages": batch,
+            "done": False,
+        })
 
-    push_result(scan_id=scan_id, messages=[], done=True, summary={
-        "group_name": group_name,
-        "group_id": group_id,
-        "total_messages": total,
-        "days_back": days_back,
+    push_result({
+        "command": "scan_historical",
+        "scan_id": scan_id,
+        "messages": [],
+        "done": True,
+        "summary": {
+            "group_name": group_name,
+            "group_id": group_id,
+            "total": total,
+            "days_back": days_back,
+        },
     })
 
-    print(f"  [scan:{scan_id}] Finished. {total} messages from {group_name}.")
-
-
-def push_result(scan_id: str, messages: list, done: bool, count: int = None):
-    payload = {
-        "scan_id": scan_id,
-        "command": "scan_historical",
-        "messages": messages,
-        "done": done,
-    }
-    if count is not None:
-        payload["count"] = count
-    stop_result(payload)
+    print(f"  [scan:{scan_id}] Done: {total} msgs, {group_name}")
 
 
 async def start_live_listener(listen_id: str, group_ids: list[int]):
@@ -93,25 +97,32 @@ async def start_live_listener(listen_id: str, group_ids: list[int]):
         sender = await event.get_sender()
         username = sender.username if sender else None
 
-        msg = {
-            "message_id": event.message.id,
-            "date": event.message.date.isoformat(),
-            "sender_id": event.message.sender_id,
-            "username": username,
-            "text": event.message.text,
-            "group_id": event.chat_id,
-            "group_name": None,  # could resolve entity, but expensive per-message
-        }
-        push_result(listen_id=list(en_id, msg))
+        push_result({
+            "command": "listen",
+            "listen_id": listen_id,
+            "type": "message",
+            "message": {
+                "message_id": event.message.id,
+                "date": event.message.date.isoformat(),
+                "sender_id": event.message.sender_id,
+                "username": username,
+                "text": event.message.text,
+                "group_id": event.chat_id,
+            },
+        })
 
     task = asyncio.current_task()
     for gid in group_ids:
         listening_tasks[gid] = task
 
-    push_result(listen_id=listen_id, started=True, group_ids=group_ids)
-    print(f"  [listen:{listen_id}] Live listener started for groups {group_ids}.")
+    push_result({
+        "command": "listen",
+        "listen_id": listen_id,
+        "type": "started",
+        "group_ids": group_ids,
+    })
+    print(f"  [listen:{listen_id}] Started for {group_ids}")
 
-    # Keep alive until stopped by a stop command
     try:
         while True:
             await asyncio.sleep(60)
@@ -119,58 +130,52 @@ async def start_live_listener(listen_id: str, group_ids: list[int]):
         for gid in group_ids:
             listening_tasks.pop(gid, None)
         client.remove_event_handler(handler)
-        push_result(listen_id=listen_id, stopped=True)
-        print(f"  [listen:{listen_id}] Live listener stopped.")
+        push_result({
+            "command": "listen",
+            "listen_id": listen_id,
+            "type": "stopped",
+        })
+        print(f"  [listen:{listen_id}] Stopped")
 
 
-def push_listen_event(listen_id: str, **kwargs):
-    payload = {"command": "listen", "listen_id": listen_id, **kwargs}
-    stop_result(payload)
-
-
-def stop_listen(listen_id: str, group_ids: list[int]):
+def stop_listener(listen_id: str, group_ids: list[int]):
     for gid in group_ids:
         task = listening_tasks.pop(gid, None)
         if task and not task.done():
             task.cancel()
-    push_listen_event(listen_id=listen_id, stopped=True)
 
 
 async def process_command(raw: str):
     try:
         cmd = json.loads(raw)
     except json.JSONDecodeError:
-        print(f"  Invalid JSON command: {raw}")
+        print(f"  Invalid JSON: {raw}")
         return
 
     action = cmd.get("action")
-    req_id = cmd.get("request_id", "unknown")
+    req_id = cmd.get("request_id", "?")
 
     if action == "scan_historical":
         group_ids = cmd.get("group_ids", [])
         days_back = cmd.get("days_back", 7)
-        print(f"  [scan:{req_id}] Scanning {len(group_ids)} group(s), {days_back} days back.")
+        print(f"  [scan:{req_id}] Scanning {len(group_ids)} group(s), {days_back}d back")
         for gid in group_ids:
             await scan_historical(req_id, gid, days_back)
 
     elif action == "listen":
         group_ids = cmd.get("group_ids", [])
-        print(f"  [listen:{req_id}] Starting live listener for {group_ids}.")
-        asyncio.create_task(listen_live_group(req_id, group_ids))
+        asyncio.create_task(start_live_listener(req_id, group_ids))
 
     elif action == "stop_listen":
         group_ids = cmd.get("group_ids", [])
-        print(f"  [listen:{req_id}] Stopping listener for {group_ids}.")
-        stop_listen(req_id, group_ids)
+        stop_listener(req_id, group_ids)
 
     elif action == "list_listeners":
-        active = {gid: str(t) for gid, t in listening_tasks.items()}
         push_result({
             "command": "list_listeners",
             "request_id": req_id,
             "active_groups": list(listening_tasks.keys()),
         })
-        print(f"  [list:{req_id}] Active listeners: {list(listening_tasks.keys())}")
 
     else:
         push_result({
@@ -183,8 +188,7 @@ async def process_command(raw: str):
 
 async def main():
     print("Worker started. Waiting for commands on 'telegram_commands'...")
-    print("Supported actions: scan_historical, listen, stop_listen, list")
-    print("Press Ctrl+C to stop.\n")
+    print("Actions: scan_historical, listen, stop_listen, list_listeners\n")
 
     running = True
 
@@ -197,19 +201,17 @@ async def main():
         try:
             loop.add_signal_handler(sig, shutdown)
         except NotImplementedError:
-            # Windows doesn't support add_signal_handler
             pass
 
     while running:
         try:
-            result = r.blpop(COMMANDS_QUEUE, timeout=PATCH_TIMEOUT)
+            result = r.blpop(COMMANDS_QUEUE, timeout=BLOCK_TIMEOUT)
         except redis.ConnectionError:
             print("Redis connection lost. Retrying in 5s...")
             await asyncio.sleep(5)
             continue
 
         if result is None:
-            # timeout — no command received, loop back and check if we're still running
             continue
 
         _, raw = result
