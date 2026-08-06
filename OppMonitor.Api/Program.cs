@@ -103,6 +103,7 @@ try
     builder.Services.AddHostedService<ExpiredTokenCleanupJob>();
     builder.Services.AddHostedService<RawDataReaderJob>();
     builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+    builder.Services.AddAutoMapper(typeof(TelegramMappingProfile));
 
     var app = builder.Build();
     app.UseSerilogRequestLogging();
