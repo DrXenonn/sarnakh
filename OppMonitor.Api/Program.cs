@@ -11,8 +11,6 @@ using OppMonitor.Api.Endpoints;
 using OppMonitor.Api.Jobs;
 using OppMonitor.Api.Services;
 using FluentValidation;
-using StackExchange.Redis;
-using System.Text.Json;
 
 // Serilog
 Log.Logger = new LoggerConfiguration()
@@ -25,7 +23,6 @@ Log.Logger = new LoggerConfiguration()
             rollingInterval: RollingInterval.Day,
             retainedFileCountLimit: 7)
     .CreateLogger();
-
 
 try
 {
@@ -104,6 +101,7 @@ try
     builder.Services.AddOpenApi();
     builder.Services.AddScoped<TokenProvider>();
     builder.Services.AddHostedService<ExpiredTokenCleanupJob>();
+    builder.Services.AddHostedService<RawDataReaderJob>();
     builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
     var app = builder.Build();
@@ -135,24 +133,6 @@ try
         {
             await roleManager.CreateAsync(new IdentityRole(Roles.Member));
         }
-    }
-
-    // Redis quick test — runs before the server starts
-    var redis = ConnectionMultiplexer.Connect("localhost:6379");
-    var dbRedis = redis.GetDatabase();
-    var json = dbRedis.ListLeftPop("telegram_results");
-
-    if (json.HasValue)
-    {
-        var result = JsonSerializer.Deserialize<JsonElement>(json.ToString());
-        var messages = result.GetProperty("messages");
-        Console.WriteLine($"Got {messages.GetArrayLength()} messages in this batch");
-        var randomMsg = messages[Random.Shared.Next(0, messages.GetArrayLength())];
-        Console.WriteLine($"Random message: {randomMsg}");
-    }
-    else
-    {
-        Console.WriteLine("No results found in telegram_results queue.");
     }
 
     app.UseAuthentication();
