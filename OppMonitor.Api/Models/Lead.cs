@@ -1,9 +1,16 @@
+using NodaTime;
+
 namespace OppMonitor.Api.Models;
 
 public class Lead
 {
-    public string Message { get; set; } = string.Empty;
+    public Guid Id { get; set; }
+    public long TelegramMessageId { get; set; }
+    public long? SenderId { get; set; }
+    public string? Username { get; set; }
+    public string Text { get; set; } = string.Empty;
     public int Score { get; set; }
-
-    //TODO add message time, sender ID, message link, etc.
+    public Instant MessageDate { get; set; }
+    public string GroupName { get; set; } = string.Empty;
+    public long GroupId { get; set; }
 }

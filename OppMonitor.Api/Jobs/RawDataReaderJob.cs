@@ -1,10 +1,21 @@
 using StackExchange.Redis;
 using System.Text.Json;
+using OppMonitor.Api.Pipeline;
+using OppMonitor.Api.Services;
 
 namespace OppMonitor.Api.Jobs;
 
 public class RawDataReaderJob : BackgroundService
 {
+    private readonly IServiceProvider _serviceProvider;
+    private readonly Pipeline.PipelineExecutor _pipelineExecutor;
+
+    public RawDataReaderJob(IServiceProvider serviceProvider, PipelineExecutor pipeline)
+    {
+        _serviceProvider = serviceProvider;
+        _pipelineExecutor = pipeline;
+    }
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         var redis = ConnectionMultiplexer.Connect("localhost:6379");
@@ -21,12 +32,18 @@ public class RawDataReaderJob : BackgroundService
             }
 
             var result = JsonSerializer.Deserialize<JsonElement>(json.ToString());
-            var messages = result.GetProperty("messages");
+            var processIdStr = result.GetProperty("scan_id").GetString();
+            var processId = Guid.Parse(processIdStr!);
 
-            foreach (var message in messages.EnumerateArray())
+            using (var scope = _serviceProvider.CreateScope())
             {
-                Console.WriteLine(message);
-                await Task.Delay(TimeSpan.FromSeconds(1));
+                var configProvider = scope.ServiceProvider.GetRequiredService<ConfigProvider>();
+                var config = await configProvider.GetConfigAsync(processId);
+
+                if (config != null)
+                {
+                    await _pipelineExecutor.RunAsync(json.ToString(), config, stoppingToken);
+                }
             }
         }
     }

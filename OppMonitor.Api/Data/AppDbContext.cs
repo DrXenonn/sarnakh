@@ -11,6 +11,13 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     {
         base.OnModelCreating(builder);
 
+        builder.Entity<Process>().ToTable("Processes", "public");
+        builder.Entity<Lead>().ToTable("Leads", "public");
+
+        builder.Entity<Process>()
+            .Property(p => p.Config)
+            .HasColumnType("jsonb");
+
         // builder.Entity<ApplicationUser>(entity =>
         //         entity.Property(e => e.EnableNotifications).HasDefaultValue(true));
         builder.HasDefaultSchema("identity");
@@ -18,6 +25,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
         builder.Entity<RefreshToken>().ToTable("RefreshTokens", "identity");
     }
 
-    public DbSet<TestModel> TestModels { get; set; }
-    public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<TestModel> TestModels => Set<TestModel>();
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<Process> Processes => Set<Process>();
+    public DbSet<Lead> Leads => Set<Lead>();
 }

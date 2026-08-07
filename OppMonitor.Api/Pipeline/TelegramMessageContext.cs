@@ -1,4 +1,5 @@
 using NodaTime;
+using OppMonitor.Api.Models;
 
 namespace OppMonitor.Api.Pipeline;
 
@@ -12,6 +13,8 @@ public class TelegramMessageContext
     public long GroupId { get; init; }
     public string GroupName { get; init; } = string.Empty;
     public Instant Date { get; init; }
+    public int ProcessId { get; set; }
+    public Config Config { get; set; } = new();
 
     // Accumulated by steps
     public List<string> MatchedKeywords { get; set; } = [];
