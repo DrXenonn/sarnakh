@@ -9,7 +9,14 @@ import signal
 
 load_dotenv()
 
-r = redis.Redis(host='localhost', port=6379, db=0)
+r = redis.Redis(
+    host='localhost',
+    port=6379,
+    db=0,
+    socket_timeout=15,          # read timeout, comfortably above BLOCK_TIMEOUT
+    socket_connect_timeout=5,
+    retry_on_timeout=True,      # auto-retry once on socket-level timeout
+)
 
 api_id = int(os.getenv("API_ID"))
 api_hash = os.getenv("API_HASH")
@@ -27,7 +34,7 @@ def push_result(payload: dict):
     r.rpush(RESULTS_QUEUE, json.dumps(payload, ensure_ascii=False))
 
 
-async def scan_historical(scan_id: str, group_id: int, days_back: int):
+async def scan_historical(process_id: str, group_id: int, days_back: int):
     entity = await client.get_entity(group_id)
     group_name = entity.title
     cutoff = datetime.now(timezone.utc) - timedelta(days=days_back)
@@ -59,7 +66,7 @@ async def scan_historical(scan_id: str, group_id: int, days_back: int):
         if len(batch) >= BATCH_SIZE:
             push_result({
                 "command": "scan_historical",
-                "scan_id": scan_id,
+                "process_id": process_id,
                 "messages": batch,
                 "done": False,
             })
@@ -70,14 +77,14 @@ async def scan_historical(scan_id: str, group_id: int, days_back: int):
         total += len(batch)
         push_result({
             "command": "scan_historical",
-            "scan_id": scan_id,
+            "process_id": process_id,
             "messages": batch,
             "done": False,
         })
 
     push_result({
         "command": "scan_historical",
-        "scan_id": scan_id,
+        "process_id": process_id,
         "messages": [],
         "done": True,
         "summary": {
@@ -88,10 +95,10 @@ async def scan_historical(scan_id: str, group_id: int, days_back: int):
         },
     })
 
-    print(f"  [scan:{scan_id}] Done: {total} msgs, {group_name}")
+    print(f"  [scan:{process_id}] Done: {total} msgs, {group_name}")
 
 
-async def start_live_listener(listen_id: str, group_ids: list[int]):
+async def start_live_listener(process_id: str, group_ids: list[int]):
     @client.on(events.NewMessage(chats=group_ids))
     async def handler(event):
         sender = await event.get_sender()
@@ -99,7 +106,7 @@ async def start_live_listener(listen_id: str, group_ids: list[int]):
 
         push_result({
             "command": "listen",
-            "listen_id": listen_id,
+            "process_id": process_id,
             "type": "message",
             "message": {
                 "message_id": event.message.id,
@@ -117,11 +124,11 @@ async def start_live_listener(listen_id: str, group_ids: list[int]):
 
     push_result({
         "command": "listen",
-        "listen_id": listen_id,
+        "process_id": process_id,
         "type": "started",
         "group_ids": group_ids,
     })
-    print(f"  [listen:{listen_id}] Started for {group_ids}")
+    print(f"  [listen:{process_id}] Started for {group_ids}")
 
     try:
         while True:
@@ -132,13 +139,13 @@ async def start_live_listener(listen_id: str, group_ids: list[int]):
         client.remove_event_handler(handler)
         push_result({
             "command": "listen",
-            "listen_id": listen_id,
+            "process_id": process_id,
             "type": "stopped",
         })
-        print(f"  [listen:{listen_id}] Stopped")
+        print(f"  [listen:{process_id}] Stopped")
 
 
-def stop_listener(listen_id: str, group_ids: list[int]):
+def stop_listener(process_id: str, group_ids: list[int]):
     for gid in group_ids:
         task = listening_tasks.pop(gid, None)
         if task and not task.done():
@@ -153,37 +160,37 @@ async def process_command(raw: str):
         return
 
     action = cmd.get("action")
-    req_id = cmd.get("request_id", "?")
+    process_id = cmd.get("process_id", "?")
 
     if action == "scan_historical":
         group_ids = cmd.get("group_ids", [])
         days_back = cmd.get("days_back", 7)
-        print(f"  [scan:{req_id}] Scanning {len(group_ids)} group(s), {days_back}d back")
+        print(f"  [scan:{process_id}] Scanning {len(group_ids)} group(s), {days_back}d back")
         for gid in group_ids:
-            await scan_historical(req_id, gid, days_back)
+            await scan_historical(process_id, gid, days_back)
 
     elif action == "listen":
         group_ids = cmd.get("group_ids", [])
-        asyncio.create_task(start_live_listener(req_id, group_ids))
+        asyncio.create_task(start_live_listener(process_id, group_ids))
 
     elif action == "stop_listen":
         group_ids = cmd.get("group_ids", [])
-        stop_listener(req_id, group_ids)
+        stop_listener(process_id, group_ids)
 
     elif action == "list_listeners":
         push_result({
             "command": "list_listeners",
-            "request_id": req_id,
+            "process_id": process_id,
             "active_groups": list(listening_tasks.keys()),
         })
 
     else:
         push_result({
             "command": "error",
-            "request_id": req_id,
+            "process_id": process_id,
             "error": f"Unknown action: {action}",
         })
-        print(f"  [error:{req_id}] Unknown action: {action}")
+        print(f"  [error:{process_id}] Unknown action: {action}")
 
 
 async def main():
@@ -206,8 +213,8 @@ async def main():
     while running:
         try:
             result = r.blpop(COMMANDS_QUEUE, timeout=BLOCK_TIMEOUT)
-        except redis.ConnectionError:
-            print("Redis connection lost. Retrying in 5s...")
+        except (redis.ConnectionError, redis.exceptions.TimeoutError) as e:
+            print(f"  [WARN] Redis connection issue ({type(e).__name__}). Retrying in 5s...")
             await asyncio.sleep(5)
             continue
 
@@ -215,7 +222,13 @@ async def main():
             continue
 
         _, raw = result
-        await process_command(raw.decode("utf-8"))
+
+        try:
+            await process_command(raw.decode("utf-8"))
+        except Exception as e:
+            print(f"  [ERROR] process_command crashed: {type(e).__name__}: {e}")
+            # Uncomment for full traceback during debugging:
+            # import traceback; traceback.print_exc()
 
     print("Shutting down...")
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -7,22 +8,20 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace OppMonitor.Api.Migrations
 {
     /// <inheritdoc />
-    public partial class AddIdentity : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.EnsureSchema(
-                name: "Identity");
+                name: "identity");
 
-            migrationBuilder.RenameTable(
-                name: "TestModels",
-                newName: "TestModels",
-                newSchema: "Identity");
+            migrationBuilder.EnsureSchema(
+                name: "public");
 
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
-                schema: "Identity",
+                schema: "identity",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
@@ -37,7 +36,7 @@ namespace OppMonitor.Api.Migrations
 
             migrationBuilder.CreateTable(
                 name: "AspNetUsers",
-                schema: "Identity",
+                schema: "identity",
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "text", nullable: false),
@@ -62,8 +61,57 @@ namespace OppMonitor.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Configs",
+                schema: "public",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Keywords = table.Column<string>(type: "jsonb", nullable: false),
+                    TelegramChatIds = table.Column<string>(type: "jsonb", nullable: false),
+                    SearchDays = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Configs", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Leads",
+                schema: "public",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    TelegramMessageId = table.Column<long>(type: "bigint", nullable: false),
+                    SenderId = table.Column<long>(type: "bigint", nullable: true),
+                    Username = table.Column<string>(type: "text", nullable: true),
+                    Text = table.Column<string>(type: "text", nullable: false),
+                    Score = table.Column<int>(type: "integer", nullable: false),
+                    MessageDate = table.Column<Instant>(type: "timestamp with time zone", nullable: false),
+                    GroupName = table.Column<string>(type: "text", nullable: false),
+                    GroupId = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Leads", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TestModels",
+                schema: "public",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Text = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TestModels", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
-                schema: "Identity",
+                schema: "identity",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -78,7 +126,7 @@ namespace OppMonitor.Api.Migrations
                     table.ForeignKey(
                         name: "FK_AspNetRoleClaims_AspNetRoles_RoleId",
                         column: x => x.RoleId,
-                        principalSchema: "Identity",
+                        principalSchema: "identity",
                         principalTable: "AspNetRoles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -86,7 +134,7 @@ namespace OppMonitor.Api.Migrations
 
             migrationBuilder.CreateTable(
                 name: "AspNetUserClaims",
-                schema: "Identity",
+                schema: "identity",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -101,7 +149,7 @@ namespace OppMonitor.Api.Migrations
                     table.ForeignKey(
                         name: "FK_AspNetUserClaims_AspNetUsers_UserId",
                         column: x => x.UserId,
-                        principalSchema: "Identity",
+                        principalSchema: "identity",
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -109,7 +157,7 @@ namespace OppMonitor.Api.Migrations
 
             migrationBuilder.CreateTable(
                 name: "AspNetUserLogins",
-                schema: "Identity",
+                schema: "identity",
                 columns: table => new
                 {
                     LoginProvider = table.Column<string>(type: "text", nullable: false),
@@ -123,7 +171,7 @@ namespace OppMonitor.Api.Migrations
                     table.ForeignKey(
                         name: "FK_AspNetUserLogins_AspNetUsers_UserId",
                         column: x => x.UserId,
-                        principalSchema: "Identity",
+                        principalSchema: "identity",
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -131,7 +179,7 @@ namespace OppMonitor.Api.Migrations
 
             migrationBuilder.CreateTable(
                 name: "AspNetUserRoles",
-                schema: "Identity",
+                schema: "identity",
                 columns: table => new
                 {
                     UserId = table.Column<string>(type: "text", nullable: false),
@@ -143,14 +191,14 @@ namespace OppMonitor.Api.Migrations
                     table.ForeignKey(
                         name: "FK_AspNetUserRoles_AspNetRoles_RoleId",
                         column: x => x.RoleId,
-                        principalSchema: "Identity",
+                        principalSchema: "identity",
                         principalTable: "AspNetRoles",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_AspNetUserRoles_AspNetUsers_UserId",
                         column: x => x.UserId,
-                        principalSchema: "Identity",
+                        principalSchema: "identity",
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -158,7 +206,7 @@ namespace OppMonitor.Api.Migrations
 
             migrationBuilder.CreateTable(
                 name: "AspNetUserTokens",
-                schema: "Identity",
+                schema: "identity",
                 columns: table => new
                 {
                     UserId = table.Column<string>(type: "text", nullable: false),
@@ -172,55 +220,110 @@ namespace OppMonitor.Api.Migrations
                     table.ForeignKey(
                         name: "FK_AspNetUserTokens_AspNetUsers_UserId",
                         column: x => x.UserId,
-                        principalSchema: "Identity",
+                        principalSchema: "identity",
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "RefreshTokens",
+                schema: "identity",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Token = table.Column<string>(type: "text", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: false),
+                    Expires = table.Column<Instant>(type: "timestamp with time zone", nullable: false),
+                    ApplicationUserId = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_RefreshTokens", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_RefreshTokens_AspNetUsers_ApplicationUserId",
+                        column: x => x.ApplicationUserId,
+                        principalSchema: "identity",
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Processes",
+                schema: "public",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ProcessStatus = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    ConfigId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Processes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Processes_Configs_ConfigId",
+                        column: x => x.ConfigId,
+                        principalSchema: "public",
+                        principalTable: "Configs",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
-                schema: "Identity",
+                schema: "identity",
                 table: "AspNetRoleClaims",
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
                 name: "RoleNameIndex",
-                schema: "Identity",
+                schema: "identity",
                 table: "AspNetRoles",
                 column: "NormalizedName",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserClaims_UserId",
-                schema: "Identity",
+                schema: "identity",
                 table: "AspNetUserClaims",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserLogins_UserId",
-                schema: "Identity",
+                schema: "identity",
                 table: "AspNetUserLogins",
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetUserRoles_RoleId",
-                schema: "Identity",
+                schema: "identity",
                 table: "AspNetUserRoles",
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
                 name: "EmailIndex",
-                schema: "Identity",
+                schema: "identity",
                 table: "AspNetUsers",
                 column: "NormalizedEmail");
 
             migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
-                schema: "Identity",
+                schema: "identity",
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Processes_ConfigId",
+                schema: "public",
+                table: "Processes",
+                column: "ConfigId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_RefreshTokens_ApplicationUserId",
+                schema: "identity",
+                table: "RefreshTokens",
+                column: "ApplicationUserId");
         }
 
         /// <inheritdoc />
@@ -228,36 +331,51 @@ namespace OppMonitor.Api.Migrations
         {
             migrationBuilder.DropTable(
                 name: "AspNetRoleClaims",
-                schema: "Identity");
+                schema: "identity");
 
             migrationBuilder.DropTable(
                 name: "AspNetUserClaims",
-                schema: "Identity");
+                schema: "identity");
 
             migrationBuilder.DropTable(
                 name: "AspNetUserLogins",
-                schema: "Identity");
+                schema: "identity");
 
             migrationBuilder.DropTable(
                 name: "AspNetUserRoles",
-                schema: "Identity");
+                schema: "identity");
 
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens",
-                schema: "Identity");
+                schema: "identity");
+
+            migrationBuilder.DropTable(
+                name: "Leads",
+                schema: "public");
+
+            migrationBuilder.DropTable(
+                name: "Processes",
+                schema: "public");
+
+            migrationBuilder.DropTable(
+                name: "RefreshTokens",
+                schema: "identity");
+
+            migrationBuilder.DropTable(
+                name: "TestModels",
+                schema: "public");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles",
-                schema: "Identity");
+                schema: "identity");
+
+            migrationBuilder.DropTable(
+                name: "Configs",
+                schema: "public");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers",
-                schema: "Identity");
-
-            migrationBuilder.RenameTable(
-                name: "TestModels",
-                schema: "Identity",
-                newName: "TestModels");
+                schema: "identity");
         }
     }
 }

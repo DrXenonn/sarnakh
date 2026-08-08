@@ -14,6 +14,7 @@ using FluentValidation;
 using OppMonitor.Api.Models;
 using OppMonitor.Api.Pipeline.Steps;
 using OppMonitor.Api.Pipeline;
+using StackExchange.Redis;
 
 // Serilog
 Log.Logger = new LoggerConfiguration()
@@ -63,8 +64,7 @@ try
     builder.Services.AddDbContextPool<AppDbContext>(opt =>
             opt.UseNpgsql(builder.Configuration.GetConnectionString("Default"),
                 o => o
-                .UseNodaTime()
-                .MapEnum<ProcessStatus>("process_status")));
+                .UseNodaTime()));
 
     // o.MapEnum<Mood>("mood") later for using postgres enums.
 
@@ -104,8 +104,11 @@ try
 
     builder.Services.AddAuthorization();
     builder.Services.AddOpenApi();
+    builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+            ConnectionMultiplexer.Connect("localhost:6379"));
     builder.Services.AddScoped<TokenProvider>();
     builder.Services.AddScoped<ConfigProvider>();
+    builder.Services.AddScoped<PipelineExecutor>();
     builder.Services.AddScoped<IPipelineStep, KeywordMatchStep>();
     builder.Services.AddScoped<IPipelineStep, StoreCargoStep>();
     builder.Services.AddHostedService<ExpiredTokenCleanupJob>();

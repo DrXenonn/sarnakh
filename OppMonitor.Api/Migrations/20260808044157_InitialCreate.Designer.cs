@@ -13,8 +13,8 @@ using OppMonitor.Api.Data;
 namespace OppMonitor.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260804194214_ForkProject")]
-    partial class ForkProject
+    [Migration("20260808044157_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -223,6 +223,86 @@ namespace OppMonitor.Api.Migrations
                     b.ToTable("AspNetUsers", "identity");
                 });
 
+            modelBuilder.Entity("OppMonitor.Api.Models.Config", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Keywords")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<int>("SearchDays")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("TelegramChatIds")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Configs", "public");
+                });
+
+            modelBuilder.Entity("OppMonitor.Api.Models.Lead", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<long>("GroupId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("GroupName")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Instant>("MessageDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("integer");
+
+                    b.Property<long?>("SenderId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("TelegramMessageId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Username")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Leads", "public");
+                });
+
+            modelBuilder.Entity("OppMonitor.Api.Models.Process", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ConfigId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ProcessStatus")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConfigId");
+
+                    b.ToTable("Processes", "public");
+                });
+
             modelBuilder.Entity("OppMonitor.Api.Models.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
@@ -316,6 +396,17 @@ namespace OppMonitor.Api.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("OppMonitor.Api.Models.Process", b =>
+                {
+                    b.HasOne("OppMonitor.Api.Models.Config", "Config")
+                        .WithMany()
+                        .HasForeignKey("ConfigId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Config");
                 });
 
             modelBuilder.Entity("OppMonitor.Api.Models.RefreshToken", b =>

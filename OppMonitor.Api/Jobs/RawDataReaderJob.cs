@@ -8,22 +8,19 @@ namespace OppMonitor.Api.Jobs;
 public class RawDataReaderJob : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly Pipeline.PipelineExecutor _pipelineExecutor;
+    private readonly IDatabase _dbRedis;
 
-    public RawDataReaderJob(IServiceProvider serviceProvider, PipelineExecutor pipeline)
+    public RawDataReaderJob(IServiceProvider serviceProvider, IConnectionMultiplexer redis)
     {
+        _dbRedis = redis.GetDatabase();
         _serviceProvider = serviceProvider;
-        _pipelineExecutor = pipeline;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var redis = ConnectionMultiplexer.Connect("localhost:6379");
-        var dbRedis = redis.GetDatabase();
-
         while (!stoppingToken.IsCancellationRequested)
         {
-            var json = dbRedis.ListLeftPop("telegram_results");
+            var json = _dbRedis.ListLeftPop("telegram_results");
 
             if (json.IsNull)
             {
@@ -32,7 +29,7 @@ public class RawDataReaderJob : BackgroundService
             }
 
             var result = JsonSerializer.Deserialize<JsonElement>(json.ToString());
-            var processIdStr = result.GetProperty("scan_id").GetString();
+            var processIdStr = result.GetProperty("process_id").GetString();
             var processId = Guid.Parse(processIdStr!);
 
             using (var scope = _serviceProvider.CreateScope())
@@ -42,7 +39,8 @@ public class RawDataReaderJob : BackgroundService
 
                 if (config != null)
                 {
-                    await _pipelineExecutor.RunAsync(json.ToString(), config, stoppingToken);
+                    var pipelineExecutor = scope.ServiceProvider.GetRequiredService<PipelineExecutor>();
+                    await pipelineExecutor.RunAsync(json.ToString(), config, stoppingToken);
                 }
             }
         }

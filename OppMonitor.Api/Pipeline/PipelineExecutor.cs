@@ -18,21 +18,29 @@ public class PipelineExecutor
 
     public async Task RunAsync(string jsonPayload, Config config, CancellationToken ct)
     {
-        var message = JsonSerializer.Deserialize<TelegramMessageDto>(jsonPayload,
+        var batch = JsonSerializer.Deserialize<TelegramBatchDto>(jsonPayload,
                 new JsonSerializerOptions
                 {
-                    PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+                    PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
                 });
 
-        var cargo = _mapper.Map<TelegramMessageContext>(message);
-        cargo.Config = config;
+        if (batch is null) return;
 
-        foreach (var step in _steps)
+        var messages = batch.Messages ?? (batch.Message is not null
+            ? new List<TelegramMessageDto> { batch.Message }
+            : new List<TelegramMessageDto>());
+
+        foreach (var messageDto in messages)
         {
-            var processedCargo = await step.ExecuteAsync(cargo, ct);
-            if (processedCargo == null) return;
+            var cargo = _mapper.Map<TelegramMessageContext>(messageDto);
+            cargo.Config = config;
 
-            cargo = processedCargo;
+            foreach (var step in _steps)
+            {
+                var processedCargo = await step.ExecuteAsync(cargo, ct);
+                if (processedCargo == null) break; // skip this message, keep going with the rest
+                cargo = processedCargo;
+            }
         }
     }
 }

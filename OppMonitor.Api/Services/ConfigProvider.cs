@@ -15,9 +15,9 @@ public class ConfigProvider
 
     public async Task<Config?> GetConfigAsync(Guid processId)
     {
-        var process = await _dbContext.Processes
-            .FirstOrDefaultAsync(p => p.Id == processId);
-
-        return process?.Config;
+        return await _dbContext.Processes
+            .Where(p => p.Id == processId)
+            .Select(p => p.Config)
+            .FirstOrDefaultAsync();
     }
 }

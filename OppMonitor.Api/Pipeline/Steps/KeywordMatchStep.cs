@@ -2,7 +2,16 @@ namespace OppMonitor.Api.Pipeline.Steps;
 
 public class KeywordMatchStep : IPipelineStep
 {
-    public async Task<TelegramMessageContext?> ExecuteAsync(TelegramMessageContext telegramMessageCtx, CancellationToken ct)
+    private readonly ILogger<KeywordMatchStep> _logger;
+
+    public KeywordMatchStep(ILogger<KeywordMatchStep> logger)
+    {
+        _logger = logger;
+    }
+
+    public async Task<TelegramMessageContext?> ExecuteAsync(
+            TelegramMessageContext telegramMessageCtx,
+            CancellationToken ct)
     {
         var text = telegramMessageCtx.Text;
         var keywords = telegramMessageCtx.Config.Keywords;
@@ -18,7 +27,16 @@ public class KeywordMatchStep : IPipelineStep
 
         telegramMessageCtx.Score += score;
 
-        // TODO Read the threshold from config later
-        return score < 1 ? null : telegramMessageCtx;
+        _logger.LogInformation(
+            "Scored message {MessageId} as {Score} (threshold not yet applied)",
+            telegramMessageCtx.MessageId, score);
+
+        if (score < 1)
+        {
+            _logger.LogInformation("Message {MessageId} dropped, score {Score} below threshold", telegramMessageCtx.MessageId, score);
+            return null;
+        }
+
+        return telegramMessageCtx;
     }
 }
