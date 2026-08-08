@@ -21,6 +21,7 @@ public class RawDataReaderJob : BackgroundService
         while (!stoppingToken.IsCancellationRequested)
         {
             var json = _dbRedis.ListLeftPop("telegram_results");
+            Console.WriteLine(json.ToString());
 
             if (json.IsNull)
             {

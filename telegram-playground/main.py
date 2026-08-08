@@ -1,4 +1,4 @@
-from telethon import TelegramClient, events
+from telethon import TelegramClient
 from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 import redis
@@ -25,13 +25,23 @@ COMMANDS_QUEUE = "telegram_commands"
 RESULTS_QUEUE = "telegram_results"
 BATCH_SIZE = 50
 BLOCK_TIMEOUT = 5
+STOP_KEY_PREFIX = "stop:"          # stop:{process_id} -> set to request cancellation
+STOP_KEY_TTL = 3600                # auto-expire stop flags after 1h so they don't pile up
+STOP_CHECK_EVERY = 20              # check the stop flag every N messages (cheap, avoids a Redis round-trip per message)
 
 client = TelegramClient("session", api_id, api_hash)
-listening_tasks: dict[int, asyncio.Task] = {}
 
 
 def push_result(payload: dict):
     r.rpush(RESULTS_QUEUE, json.dumps(payload, ensure_ascii=False))
+
+
+def is_stop_requested(process_id: str) -> bool:
+    return r.exists(f"{STOP_KEY_PREFIX}{process_id}") == 1
+
+
+def clear_stop_flag(process_id: str):
+    r.delete(f"{STOP_KEY_PREFIX}{process_id}")
 
 
 async def scan_historical(process_id: str, group_id: int, days_back: int):
@@ -41,8 +51,15 @@ async def scan_historical(process_id: str, group_id: int, days_back: int):
 
     batch = []
     total = 0
+    stopped = False
+    checked = 0
 
     async for message in client.iter_messages(group_id):
+        checked += 1
+        if checked % STOP_CHECK_EVERY == 0 and is_stop_requested(process_id):
+            stopped = True
+            break
+
         if message.date is None:
             continue
         if message.date < cutoff:
@@ -68,7 +85,7 @@ async def scan_historical(process_id: str, group_id: int, days_back: int):
                 "command": "scan_historical",
                 "process_id": process_id,
                 "messages": batch,
-                "done": False,
+                "status": "running",
             })
             total += len(batch)
             batch = []
@@ -79,77 +96,25 @@ async def scan_historical(process_id: str, group_id: int, days_back: int):
             "command": "scan_historical",
             "process_id": process_id,
             "messages": batch,
-            "done": False,
+            "status": "running",
         })
 
+    # Terminator: signals the scan for this group is finished, either completed
+    # naturally or stopped early. status is one of: "completed" | "stopped".
+    # No summary block - the consumer already knows group_id/group_name/days_back
+    # from the original command and every message it already received.
     push_result({
         "command": "scan_historical",
         "process_id": process_id,
         "messages": [],
-        "done": True,
-        "summary": {
-            "group_name": group_name,
-            "group_id": group_id,
-            "total": total,
-            "days_back": days_back,
-        },
+        "status": "stopped" if stopped else "completed",
     })
 
-    print(f"  [scan:{process_id}] Done: {total} msgs, {group_name}")
-
-
-async def start_live_listener(process_id: str, group_ids: list[int]):
-    @client.on(events.NewMessage(chats=group_ids))
-    async def handler(event):
-        sender = await event.get_sender()
-        username = sender.username if sender else None
-
-        push_result({
-            "command": "listen",
-            "process_id": process_id,
-            "type": "message",
-            "message": {
-                "message_id": event.message.id,
-                "date": event.message.date.isoformat(),
-                "sender_id": event.message.sender_id,
-                "username": username,
-                "text": event.message.text,
-                "group_id": event.chat_id,
-            },
-        })
-
-    task = asyncio.current_task()
-    for gid in group_ids:
-        listening_tasks[gid] = task
-
-    push_result({
-        "command": "listen",
-        "process_id": process_id,
-        "type": "started",
-        "group_ids": group_ids,
-    })
-    print(f"  [listen:{process_id}] Started for {group_ids}")
-
-    try:
-        while True:
-            await asyncio.sleep(60)
-    except asyncio.CancelledError:
-        for gid in group_ids:
-            listening_tasks.pop(gid, None)
-        client.remove_event_handler(handler)
-        push_result({
-            "command": "listen",
-            "process_id": process_id,
-            "type": "stopped",
-        })
-        print(f"  [listen:{process_id}] Stopped")
-
-
-def stop_listener(process_id: str, group_ids: list[int]):
-    for gid in group_ids:
-        task = listening_tasks.pop(gid, None)
-        if task and not task.done():
-            task.cancel()
+    if stopped:
+        clear_stop_flag(process_id)
+        print(f"  [scan:{process_id}] Stopped early: {total} msgs, {group_name}")
+    else:
+        print(f"  [scan:{process_id}] Done: {total} msgs, {group_name}")
 
 
 async def process_command(raw: str):
@@ -169,20 +134,11 @@ async def process_command(raw: str):
         for gid in group_ids:
             await scan_historical(process_id, gid, days_back)
 
-    elif action == "listen":
-        group_ids = cmd.get("group_ids", [])
-        asyncio.create_task(start_live_listener(process_id, group_ids))
-
-    elif action == "stop_listen":
-        group_ids = cmd.get("group_ids", [])
-        stop_listener(process_id, group_ids)
-
-    elif action == "list_listeners":
-        push_result({
-            "command": "list_listeners",
-            "process_id": process_id,
-            "active_groups": list(listening_tasks.keys()),
-        })
+    elif action == "stop_scan":
+        # Sets a flag scan_historical checks periodically. Auto-expires so a
+        # stop request for a process that already finished doesn't linger forever.
+        r.set(f"{STOP_KEY_PREFIX}{process_id}", "1", ex=STOP_KEY_TTL)
+        print(f"  [stop:{process_id}] Stop requested")
 
     else:
         push_result({
@@ -195,7 +151,7 @@ async def process_command(raw: str):
 
 async def main():
     print("Worker started. Waiting for commands on 'telegram_commands'...")
-    print("Actions: scan_historical, listen, stop_listen, list_listeners\n")
+    print("Actions: scan_historical, stop_scan\n")
 
     running = True
 
