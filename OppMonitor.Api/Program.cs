@@ -11,7 +11,6 @@ using OppMonitor.Api.Endpoints;
 using OppMonitor.Api.Jobs;
 using OppMonitor.Api.Services;
 using FluentValidation;
-using OppMonitor.Api.Models;
 using OppMonitor.Api.Pipeline.Steps;
 using OppMonitor.Api.Pipeline;
 using StackExchange.Redis;
