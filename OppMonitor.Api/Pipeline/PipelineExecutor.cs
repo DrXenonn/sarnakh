@@ -7,6 +7,11 @@ namespace OppMonitor.Api.Pipeline;
 
 public class PipelineExecutor
 {
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+    };
+
     private readonly IMapper _mapper;
     private readonly IEnumerable<IPipelineStep> _steps;
 
@@ -18,19 +23,12 @@ public class PipelineExecutor
 
     public async Task RunAsync(string jsonPayload, Config config, CancellationToken ct)
     {
-        var batch = JsonSerializer.Deserialize<TelegramBatchDto>(jsonPayload,
-                new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower,
-                });
+        var batch = JsonSerializer.Deserialize<TelegramBatchDto>(jsonPayload, JsonOptions);
 
-        if (batch is null) return;
+        if (batch is null || batch.Messages is null || batch.Messages.Count == 0)
+            return;
 
-        var messages = batch.Messages ?? (batch.Message is not null
-            ? new List<TelegramMessageDto> { batch.Message }
-            : new List<TelegramMessageDto>());
-
-        foreach (var messageDto in messages)
+        foreach (var messageDto in batch.Messages)
         {
             var cargo = _mapper.Map<TelegramMessageContext>(messageDto);
             cargo.Config = config;
