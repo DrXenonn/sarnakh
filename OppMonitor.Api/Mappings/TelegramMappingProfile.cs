@@ -10,6 +10,18 @@ public class TelegramMappingProfile : Profile
         CreateMap<TelegramMessageDto, TelegramMessageContext>()
        .ForMember(dest => dest.Date,
                opt =>
-               opt.MapFrom(src => Instant.FromDateTimeOffset(src.Date)));
+               opt.MapFrom(src => Instant.FromDateTimeOffset(src.Date)))
+       .ForMember(dest => dest.Score,
+               opt => opt.Ignore())
+       .ForMember(dest => dest.ProcessId,
+               opt => opt.Ignore())
+       .ForMember(dest => dest.Config,
+               opt => opt.Ignore())
+       .ForMember(dest => dest.MatchedKeywords,
+               opt => opt.Ignore())
+       .ForMember(dest => dest.IsLead,
+               opt => opt.Ignore())
+       .ForMember(dest => dest.DropReason,
+               opt => opt.Ignore());
     }
 }

@@ -20,8 +20,7 @@ public class RawDataReaderJob : BackgroundService
     {
         while (!stoppingToken.IsCancellationRequested)
         {
-            var json = _dbRedis.ListLeftPop("telegram_results");
-            Console.WriteLine(json.ToString());
+            var json = await _dbRedis.ListLeftPopAsync("telegram_results");
 
             if (json.IsNull)
             {
@@ -41,7 +40,7 @@ public class RawDataReaderJob : BackgroundService
                 if (config != null)
                 {
                     var pipelineExecutor = scope.ServiceProvider.GetRequiredService<PipelineExecutor>();
-                    await pipelineExecutor.RunAsync(json.ToString(), config, stoppingToken);
+                    await pipelineExecutor.RunAsync(json.ToString(), config, processId, stoppingToken);
                 }
             }
         }

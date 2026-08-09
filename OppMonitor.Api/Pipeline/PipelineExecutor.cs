@@ -21,7 +21,7 @@ public class PipelineExecutor
         _steps = steps;
     }
 
-    public async Task RunAsync(string jsonPayload, Config config, CancellationToken ct)
+    public async Task RunAsync(string jsonPayload, Config config, Guid processId, CancellationToken ct)
     {
         var batch = JsonSerializer.Deserialize<TelegramBatchDto>(jsonPayload, JsonOptions);
 
@@ -32,11 +32,12 @@ public class PipelineExecutor
         {
             var cargo = _mapper.Map<TelegramMessageContext>(messageDto);
             cargo.Config = config;
+            cargo.ProcessId = processId;
 
             foreach (var step in _steps)
             {
                 var processedCargo = await step.ExecuteAsync(cargo, ct);
-                if (processedCargo == null) break; // skip this message, keep going with the rest
+                if (processedCargo == null) break;
                 cargo = processedCargo;
             }
         }
