@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging.Abstractions;
+using OppMonitor.Api.Models;
 using OppMonitor.Api.Pipeline;
 using OppMonitor.Api.Pipeline.Steps;
 
@@ -23,14 +24,17 @@ public class KeywordMatchStepTests
         var cargo = new TelegramMessageContext
         {
             Text = text,
-            Config = new Models.Config
+            Process = new Process
             {
-                Keywords = new Dictionary<string, int>
+                Config = new Config()
                 {
-                    {"NotTeeest", 10},
-                    {"فارسی", 6},
-                    {"good", 5},
-                    {"will appear", 5}
+                    Keywords = new Dictionary<string, int>
+                    {
+                        {"NotTeeest", 10},
+                        {"فارسی", 6},
+                        {"good", 5},
+                        {"will appear", 5}
+                    }
                 }
             }
         };

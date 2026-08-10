@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using OppMonitor.Api.Dtos;
-using Xunit;
 
 namespace OppMonitor.Api.Tests.Dtos;
 
