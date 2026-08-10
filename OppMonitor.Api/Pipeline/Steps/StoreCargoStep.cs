@@ -5,18 +5,15 @@ namespace OppMonitor.Api.Pipeline.Steps;
 
 public class StoreCargoStep : IPipelineStep
 {
-    private readonly IServiceProvider _serviceProvider;
+    private readonly AppDbContext _dbContext;
 
-    public StoreCargoStep(IServiceProvider serviceProvider)
+    public StoreCargoStep(AppDbContext dbContext)
     {
-        _serviceProvider = serviceProvider;
+        _dbContext = dbContext;
     }
 
     public async Task<TelegramMessageContext?> ExecuteAsync(TelegramMessageContext ctx, CancellationToken ct)
     {
-        using var scope = _serviceProvider.CreateScope();
-        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
         var lead = new Lead
         {
             Id = Guid.NewGuid(),
@@ -33,6 +30,7 @@ public class StoreCargoStep : IPipelineStep
         _dbContext.Leads.Add(lead);
         ctx.Process.ProcessStatus = ProcessStatus.Completed;
 
+        await _dbContext.SaveChangesAsync(ct);
         return ctx;
     }
 }
