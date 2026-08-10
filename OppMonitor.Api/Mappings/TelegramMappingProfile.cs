@@ -13,9 +13,7 @@ public class TelegramMappingProfile : Profile
                opt.MapFrom(src => Instant.FromDateTimeOffset(src.Date)))
        .ForMember(dest => dest.Score,
                opt => opt.Ignore())
-       .ForMember(dest => dest.ProcessId,
-               opt => opt.Ignore())
-       .ForMember(dest => dest.Config,
+       .ForMember(dest => dest.Process,
                opt => opt.Ignore())
        .ForMember(dest => dest.MatchedKeywords,
                opt => opt.Ignore())

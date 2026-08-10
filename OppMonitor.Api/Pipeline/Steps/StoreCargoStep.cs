@@ -30,8 +30,8 @@ public class StoreCargoStep : IPipelineStep
             GroupId = ctx.GroupId
         };
 
-        db.Leads.Add(lead);
-        await db.SaveChangesAsync(ct);
+        _dbContext.Leads.Add(lead);
+        ctx.Process.ProcessStatus = ProcessStatus.Completed;
 
         return ctx;
     }

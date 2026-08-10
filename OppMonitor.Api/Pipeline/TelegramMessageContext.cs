@@ -13,8 +13,7 @@ public class TelegramMessageContext
     public long GroupId { get; init; }
     public string GroupName { get; init; } = string.Empty;
     public Instant Date { get; init; }
-    public Guid ProcessId { get; set; }
-    public Config Config { get; set; } = new();
+    public Process Process { get; set; } = null!;
 
     // Accumulated by steps
     public List<string> MatchedKeywords { get; set; } = [];

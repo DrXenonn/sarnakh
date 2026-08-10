@@ -30,17 +30,19 @@ public class RawDataReaderJob : BackgroundService
 
             var result = JsonSerializer.Deserialize<JsonElement>(json.ToString());
             var processIdStr = result.GetProperty("process_id").GetString();
+            var processStatus = result.GetProperty("status").GetString();
             var processId = Guid.Parse(processIdStr!);
 
             using (var scope = _serviceProvider.CreateScope())
             {
-                var configProvider = scope.ServiceProvider.GetRequiredService<ConfigProvider>();
-                var config = await configProvider.GetConfigAsync(processId);
+                var processProvider = scope.ServiceProvider.GetRequiredService<ProcessManager>();
+                var process = await processProvider.GetProcessAsync(processId);
 
-                if (config != null)
+                if (process != null)
                 {
+                    await processProvider.UpdateStatus(process, processStatus);
                     var pipelineExecutor = scope.ServiceProvider.GetRequiredService<PipelineExecutor>();
-                    await pipelineExecutor.RunAsync(json.ToString(), config, processId, stoppingToken);
+                    await pipelineExecutor.RunAsync(json.ToString(), process, stoppingToken);
                 }
             }
         }

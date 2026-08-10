@@ -106,7 +106,7 @@ try
     builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
             ConnectionMultiplexer.Connect("localhost:6379"));
     builder.Services.AddScoped<TokenProvider>();
-    builder.Services.AddScoped<ConfigProvider>();
+    builder.Services.AddScoped<ProcessManager>();
     builder.Services.AddScoped<PipelineExecutor>();
     builder.Services.AddScoped<IPipelineStep, KeywordMatchStep>();
     builder.Services.AddScoped<IPipelineStep, StoreCargoStep>();

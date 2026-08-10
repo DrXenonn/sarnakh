@@ -14,7 +14,7 @@ public class KeywordMatchStep : IPipelineStep
             CancellationToken ct)
     {
         var text = telegramMessageCtx.Text;
-        var keywords = telegramMessageCtx.Config.Keywords;
+        var keywords = telegramMessageCtx.Process.Config.Keywords;
         int score = 0;
 
         foreach (var keyword in keywords)
