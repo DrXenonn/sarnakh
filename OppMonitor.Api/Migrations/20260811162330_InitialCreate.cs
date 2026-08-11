@@ -89,7 +89,8 @@ namespace OppMonitor.Api.Migrations
                     Score = table.Column<int>(type: "integer", nullable: false),
                     MessageDate = table.Column<Instant>(type: "timestamp with time zone", nullable: false),
                     GroupName = table.Column<string>(type: "text", nullable: false),
-                    GroupId = table.Column<long>(type: "bigint", nullable: false)
+                    GroupId = table.Column<long>(type: "bigint", nullable: false),
+                    ProcessId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {

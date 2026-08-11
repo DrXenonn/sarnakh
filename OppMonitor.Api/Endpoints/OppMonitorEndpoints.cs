@@ -10,6 +10,7 @@ public static class StarterEndpoints
         var group = app.MapGroup("/app");
 
         group.MapPost("/processes", SubmitProcessHandler.Handler);
+        group.MapGet("/leads/{processId}", GetLeadsHandler.Handler);
         //---Auth---------------------------------
         group.MapPost("/register", RegisterHandler.Handler);
         group.MapPost("/login", LoginHandler.Handler);

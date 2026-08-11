@@ -261,6 +261,9 @@ namespace OppMonitor.Api.Migrations
                     b.Property<Instant>("MessageDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<int>("ProcessId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("Score")
                         .HasColumnType("integer");
 
