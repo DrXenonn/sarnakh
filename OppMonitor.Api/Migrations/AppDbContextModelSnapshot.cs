@@ -230,6 +230,9 @@ namespace OppMonitor.Api.Migrations
                         .IsRequired()
                         .HasColumnType("jsonb");
 
+                    b.Property<int>("ScoreThreshold")
+                        .HasColumnType("integer");
+
                     b.Property<int>("SearchDays")
                         .HasColumnType("integer");
 

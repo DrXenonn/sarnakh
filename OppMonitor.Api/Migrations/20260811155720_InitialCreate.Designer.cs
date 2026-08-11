@@ -13,7 +13,7 @@ using OppMonitor.Api.Data;
 namespace OppMonitor.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260809091905_InitialCreate")]
+    [Migration("20260811155720_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -232,6 +232,9 @@ namespace OppMonitor.Api.Migrations
                     b.Property<string>("Keywords")
                         .IsRequired()
                         .HasColumnType("jsonb");
+
+                    b.Property<int>("ScoreThreshold")
+                        .HasColumnType("integer");
 
                     b.Property<int>("SearchDays")
                         .HasColumnType("integer");

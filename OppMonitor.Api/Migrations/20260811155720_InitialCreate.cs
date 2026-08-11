@@ -68,7 +68,8 @@ namespace OppMonitor.Api.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Keywords = table.Column<string>(type: "jsonb", nullable: false),
                     TelegramChatIds = table.Column<string>(type: "jsonb", nullable: false),
-                    SearchDays = table.Column<int>(type: "integer", nullable: false)
+                    SearchDays = table.Column<int>(type: "integer", nullable: false),
+                    ScoreThreshold = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {

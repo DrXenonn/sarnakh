@@ -18,8 +18,6 @@ public class TelegramMappingProfile : Profile
        .ForMember(dest => dest.MatchedKeywords,
                opt => opt.Ignore())
        .ForMember(dest => dest.IsLead,
-               opt => opt.Ignore())
-       .ForMember(dest => dest.DropReason,
                opt => opt.Ignore());
     }
 }
