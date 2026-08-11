@@ -19,7 +19,4 @@ public class TelegramMessageContext
     public List<string> MatchedKeywords { get; set; } = [];
     public int Score { get; set; }
     public bool IsLead { get; set; }
-
-    // Optional metadata for debugging
-    public string? DropReason { get; set; }
 }

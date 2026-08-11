@@ -20,7 +20,8 @@ public class SubmitProcessHandler
             Id = Guid.NewGuid(),
             Keywords = configDto.Keywords,
             TelegramChatIds = configDto.TelegramChatIds,
-            SearchDays = configDto.SearchDays
+            SearchDays = configDto.SearchDays,
+            ScoreThreshold = configDto.ScoreThreshold
         };
 
         var newProcess = new Process

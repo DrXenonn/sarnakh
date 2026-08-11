@@ -21,17 +21,13 @@ public class KeywordMatchStep : IPipelineStep
         {
             if (text.Contains(keyword.Key))
             {
-                score += 1 * keyword.Value;
+                score += keyword.Value;
             }
         }
 
         telegramMessageCtx.Score += score;
 
-        _logger.LogInformation(
-            "Scored message {MessageId} as {Score} (threshold not yet applied)",
-            telegramMessageCtx.MessageId, score);
-
-        if (score < 1)
+        if (score <= telegramMessageCtx.Process.Config.ScoreThreshold)
         {
             _logger.LogInformation("Message {MessageId} dropped, score {Score} below threshold", telegramMessageCtx.MessageId, score);
             return null;
