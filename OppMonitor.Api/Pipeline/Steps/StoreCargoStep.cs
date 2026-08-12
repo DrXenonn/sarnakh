@@ -27,6 +27,7 @@ public class StoreCargoStep : IPipelineStep
             GroupId = ctx.GroupId
         };
 
+        lead.ProcessId = ctx.Process.Id;
         _dbContext.Leads.Add(lead);
         ctx.Process.ProcessStatus = ProcessStatus.Completed;
 

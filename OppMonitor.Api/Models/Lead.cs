@@ -13,5 +13,5 @@ public class Lead
     public Instant MessageDate { get; set; }
     public string GroupName { get; set; } = string.Empty;
     public long GroupId { get; set; }
-    public int ProcessId { get; set; }
+    public Guid ProcessId { get; set; }
 }

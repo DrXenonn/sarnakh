@@ -90,7 +90,7 @@ namespace OppMonitor.Api.Migrations
                     MessageDate = table.Column<Instant>(type: "timestamp with time zone", nullable: false),
                     GroupName = table.Column<string>(type: "text", nullable: false),
                     GroupId = table.Column<long>(type: "bigint", nullable: false),
-                    ProcessId = table.Column<int>(type: "integer", nullable: false)
+                    ProcessId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {

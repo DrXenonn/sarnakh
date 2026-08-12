@@ -13,7 +13,7 @@ using OppMonitor.Api.Data;
 namespace OppMonitor.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260811162330_InitialCreate")]
+    [Migration("20260811165552_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -264,8 +264,8 @@ namespace OppMonitor.Api.Migrations
                     b.Property<Instant>("MessageDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("ProcessId")
-                        .HasColumnType("integer");
+                    b.Property<Guid>("ProcessId")
+                        .HasColumnType("uuid");
 
                     b.Property<int>("Score")
                         .HasColumnType("integer");
