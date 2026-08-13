@@ -20,35 +20,47 @@ public class OperatorBotJob : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // _bot.OnMessage += OnMessage;
+        _bot.OnMessage += OnMessage;
         _bot.OnUpdate += OnUpdate;
 
         await Task.Delay(Timeout.Infinite, stoppingToken);
     }
 
-    private async Task OnUpdate(Update update)
+    private Task OnUpdate(Update update)
     {
-        if (update.CallbackQuery is null)
-            return;
+        var callback = update.CallbackQuery;
 
+        if (callback?.Data is null || callback.Message is null)
+            return Task.CompletedTask;
+
+        return HandleAction(new BotAction(
+            callback.Data,
+            callback.Message.Chat.Id
+        ));
+    }
+
+    private Task OnMessage(Message message, UpdateType type)
+    {
+        if (message.Text is null)
+            return Task.CompletedTask;
+
+        return HandleAction(new BotAction(
+            message.Text,
+            message.Chat.Id
+        ));
+    }
+
+    private async Task HandleAction(BotAction action)
+    {
         using var scope = _scopeFactory.CreateScope();
 
         var handlers = scope.ServiceProvider
-            .GetRequiredService<IEnumerable<IBotCallbackHandler>>();
+            .GetRequiredService<IEnumerable<IBotHandler>>();
 
-        var action = update.CallbackQuery.Data;
-        Console.WriteLine("got the action: " + action);
+        var handler = handlers.FirstOrDefault(
+                h => h.Action == action.Action);
 
-        var handler = handlers.FirstOrDefault(h => h.Action == action);
-
-        if (handler != null)
-            await handler.HandleAsync(update.CallbackQuery);
+        if (handler is not null)
+            await handler.HandleAsync(action);
     }
-
-    // private Task OnMessage(Message msg, UpdateType type)
-    // {
-    //     if (msg.Text != "/start")
-    //         return;
-    //
-    // }
 }
