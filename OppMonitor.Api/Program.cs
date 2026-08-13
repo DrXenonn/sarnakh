@@ -14,6 +14,8 @@ using FluentValidation;
 using OppMonitor.Api.Pipeline.Steps;
 using OppMonitor.Api.Pipeline;
 using StackExchange.Redis;
+using Telegram.Bot;
+using OppMonitor.Api.Bot.Handlers;
 
 // Serilog
 Log.Logger = new LoggerConfiguration()
@@ -114,6 +116,17 @@ try
     builder.Services.AddHostedService<RawDataReaderJob>();
     builder.Services.AddValidatorsFromAssemblyContaining<Program>();
     builder.Services.AddAutoMapper(typeof(TelegramMappingProfile));
+
+    builder.Services.AddSingleton<TelegramBotClient>(sp =>
+    {
+        var token = builder.Configuration["LeadTelegramBotSecret"]
+            ?? throw new InvalidOperationException("LeadTelegramBotSecret is not configured.");
+        return new TelegramBotClient(token);
+    });
+
+    builder.Services.AddScoped<IBotCallbackHandler, SayHelloHandler>();
+    builder.Services.AddHostedService<OperatorBotJob>();
+
 
     var app = builder.Build();
     app.UseSerilogRequestLogging();
