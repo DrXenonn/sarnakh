@@ -13,7 +13,7 @@ using OppMonitor.Api.Data;
 namespace OppMonitor.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260811165552_InitialCreate")]
+    [Migration("20260814153016_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -301,6 +301,9 @@ namespace OppMonitor.Api.Migrations
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
+
+                    b.Property<long>("TelegramUserId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("Id");
 

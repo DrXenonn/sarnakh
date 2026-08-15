@@ -9,6 +9,9 @@ public interface IBotHandler
 }
 
 public record BotAction(
+        long UserId,
         string Action,
-        long ChatId
+        string? Data,
+        long ChatId,
+        int? MessageId
         );

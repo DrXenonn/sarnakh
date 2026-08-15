@@ -33,20 +33,28 @@ public class OperatorBotJob : BackgroundService
         if (callback?.Data is null || callback.Message is null)
             return Task.CompletedTask;
 
-        return HandleAction(new BotAction(
-            callback.Data,
-            callback.Message.Chat.Id
-        ));
-    }
+        var parts = callback.Data.Split(':');
 
+        return HandleAction(new BotAction(
+            callback.From.Id,
+            parts[0],
+            parts.Length > 1 ? parts[1] : null,
+            callback.Message.Chat.Id,
+            callback.Message.Id
+        ));
+
+    }
     private Task OnMessage(Message message, UpdateType type)
     {
-        if (message.Text is null)
+        if (message.Text is null || message.Text != "/start")
             return Task.CompletedTask;
 
         return HandleAction(new BotAction(
+            message.From!.Id,
             message.Text,
-            message.Chat.Id
+            null,
+            message.Chat.Id,
+         null
         ));
     }
 

@@ -1,5 +1,6 @@
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace OppMonitor.Api.Bot.Handlers;
 
@@ -16,7 +17,31 @@ public class BotMainmenuHandler : IBotHandler
 
     public async Task<Message> HandleAsync(BotAction action)
     {
-        Console.WriteLine("yo");
-        return await _bot.SendMessage(action.ChatId, "Mainmenu");
+        var keyboard = new InlineKeyboardMarkup
+        {
+            InlineKeyboard =
+            [
+                [("🔎 جستجوی جدید", "new_search")],
+                [("📋 جستجوهای من", "searches")]
+            ]
+        };
+
+        var text = "چه کاری می‌خواهید انجام دهید؟";
+
+        if (action.MessageId is not null)
+        {
+            return await _bot.EditMessageText(
+                chatId: action.ChatId,
+                messageId: action.MessageId.Value,
+                text: text,
+                replyMarkup: keyboard
+            );
+        }
+
+        return await _bot.SendMessage(
+            chatId: action.ChatId,
+            text: text,
+            replyMarkup: keyboard
+        );
     }
 }

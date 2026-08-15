@@ -125,6 +125,8 @@ try
     });
 
     builder.Services.AddScoped<IBotHandler, BotMainmenuHandler>();
+    builder.Services.AddScoped<IBotHandler, BotSearchesHandler>();
+    builder.Services.AddScoped<IBotHandler, BotNewSearchHandler>();
     builder.Services.AddHostedService<OperatorBotJob>();
 
 
