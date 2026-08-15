@@ -1,57 +1,46 @@
+using OppMonitor.Api.Data;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
+using Microsoft.EntityFrameworkCore;
 
 namespace OppMonitor.Api.Bot.Handlers;
 
 public class BotNewSearchHandler : IBotHandler
 {
     private readonly TelegramBotClient _bot;
+    private readonly AppDbContext _dbContext;
 
-    public BotNewSearchHandler(TelegramBotClient bot)
+    public BotNewSearchHandler(
+        TelegramBotClient bot,
+        AppDbContext dbContext)
     {
         _bot = bot;
+        _dbContext = dbContext;
     }
 
     public string Action => "new_search";
 
+    //TODO: we create an empty process with Draft status and populate it during these steps.
+
     public async Task<Message> HandleAsync(BotAction action)
     {
+        var groupCategories = await _dbContext.TelegramGroupCategories.ToListAsync();
+
+        var buttons = new List<IEnumerable<InlineKeyboardButton>>();
+
+        foreach (var groupCategory in groupCategories)
+        {
+            var button = InlineKeyboardButton
+                .WithCallbackData(
+                        $"{groupCategory.Name} ({groupCategory.GroupIds.Count} گروه)",
+                        groupCategory.Id.ToString());
+            buttons.Add([button]);
+        }
+
         var keyboard = new InlineKeyboardMarkup
         {
-            InlineKeyboard =
-            [
-                [
-                    InlineKeyboardButton.WithCallbackData(
-                        "💄 زیبایی و مراقبت",
-                        "category:beauty"
-                    )
-                ],
-                [
-                    InlineKeyboardButton.WithCallbackData(
-                        "⚽ ورزش",
-                        "category:sports"
-                    )
-                ],
-                [
-                    InlineKeyboardButton.WithCallbackData(
-                        "🏠 خانه و آشپزی",
-                        "category:home"
-                    )
-                ],
-                [
-                    InlineKeyboardButton.WithCallbackData(
-                        "🚗 خودرو",
-                        "category:cars"
-                    )
-                ],
-                [
-                    InlineKeyboardButton.WithCallbackData(
-                        "🔙 بازگشت",
-                        "/start"
-                    )
-                ]
-            ]
+            InlineKeyboard = buttons
         };
 
         const string text =

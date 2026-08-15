@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 using NodaTime;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -95,6 +96,20 @@ namespace OppMonitor.Api.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Leads", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TelegramGroupCategories",
+                schema: "public",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false),
+                    GroupIds = table.Column<List<long>>(type: "bigint[]", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TelegramGroupCategories", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -363,6 +378,10 @@ namespace OppMonitor.Api.Migrations
             migrationBuilder.DropTable(
                 name: "RefreshTokens",
                 schema: "identity");
+
+            migrationBuilder.DropTable(
+                name: "TelegramGroupCategories",
+                schema: "public");
 
             migrationBuilder.DropTable(
                 name: "TestModels",

@@ -16,6 +16,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
         builder.Entity<Process>().ToTable("Processes", "public");
         builder.Entity<Lead>().ToTable("Leads", "public");
         builder.Entity<Config>().ToTable("Configs", "public");
+        builder.Entity<TelegramGroupCategory>().ToTable("TelegramGroupCategories", "public");
+        builder.Entity<TelegramGroupCategory>()
+            .Property(x => x.GroupIds)
+            .HasColumnType("bigint[]");
 
         builder.Entity<Process>()
             .HasOne(p => p.Config)
@@ -61,4 +65,5 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<Process> Processes => Set<Process>();
     public DbSet<Lead> Leads => Set<Lead>();
     public DbSet<Config> Configs => Set<Config>();
+    public DbSet<TelegramGroupCategory> TelegramGroupCategories => Set<TelegramGroupCategory>();
 }
