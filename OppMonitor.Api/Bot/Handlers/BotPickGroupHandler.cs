@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace OppMonitor.Api.Bot.Handlers;
 
-public class BotPickGroupHandler : IBotHandler
+public class BotPickGroupHandler : IBotActionHandler
 {
     private readonly TelegramBotClient _bot;
     private readonly AppDbContext _dbContext;

@@ -4,7 +4,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace OppMonitor.Api.Bot.Handlers;
 
-public class BotMainmenuHandler : IBotHandler
+public class BotMainmenuHandler : IBotActionHandler
 {
     private readonly TelegramBotClient _bot;
 
@@ -13,7 +13,7 @@ public class BotMainmenuHandler : IBotHandler
         _bot = bot;
     }
 
-    public string Action => "/start";
+    public string Action => "start";
 
     public async Task<Message> HandleAsync(BotAction action)
     {

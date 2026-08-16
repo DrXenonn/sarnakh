@@ -7,7 +7,7 @@ public class Process
     public ProcessStatus ProcessStatus { get; set; }
     public Guid? ConfigId { get; set; }
     public Config? Config { get; set; }
-    public ProcessInputState ProcessInputState { get; set; }
+    public ProcessInputState ProcessInputState { get; set; } = ProcessInputState.None;
 }
 
 public enum ProcessStatus

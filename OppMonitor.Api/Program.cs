@@ -124,9 +124,10 @@ try
         return new TelegramBotClient(token);
     });
 
-    builder.Services.AddScoped<IBotHandler, BotMainmenuHandler>();
-    builder.Services.AddScoped<IBotHandler, BotSearchesHandler>();
-    builder.Services.AddScoped<IBotHandler, BotNewSearchHandler>();
+    builder.Services.AddScoped<IBotActionHandler, BotMainmenuHandler>();
+    builder.Services.AddScoped<IBotActionHandler, BotPickGroupHandler>();
+    builder.Services.AddScoped<IBotActionHandler, BotNewSearchHandler>();
+    builder.Services.AddScoped<BotMessageHandler>();
     builder.Services.AddHostedService<OperatorBotJob>();
 
 

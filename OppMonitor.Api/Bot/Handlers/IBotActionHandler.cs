@@ -2,7 +2,7 @@ using Telegram.Bot.Types;
 
 namespace OppMonitor.Api.Bot.Handlers;
 
-public interface IBotHandler
+public interface IBotActionHandler
 {
     string Action { get; }
     Task<Message> HandleAsync(BotAction action);

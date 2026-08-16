@@ -2,6 +2,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using OppMonitor.Api.Bot.Handlers;
+using OppMonitor.Api.Data;
 
 namespace OppMonitor.Api.Jobs;
 
@@ -42,20 +43,21 @@ public class OperatorBotJob : BackgroundService
             callback.Message.Chat.Id,
             callback.Message.Id
         ));
-
     }
+
     private Task OnMessage(Message message, UpdateType type)
     {
-        if (message.Text is null || message.Text != "/start")
+        if (message.Text is null)
             return Task.CompletedTask;
 
-        return HandleAction(new BotAction(
-            message.From!.Id,
-            message.Text,
-            null,
-            message.Chat.Id,
-         null
-        ));
+        return HandleMessage(message);
+    }
+
+    private async Task HandleMessage(Message message)
+    {
+        using var scope = _scopeFactory.CreateScope();
+        var handler = scope.ServiceProvider.GetRequiredService<BotMessageHandler>();
+        await handler.HandleAsync(message);
     }
 
     private async Task HandleAction(BotAction action)
@@ -63,7 +65,7 @@ public class OperatorBotJob : BackgroundService
         using var scope = _scopeFactory.CreateScope();
 
         var handlers = scope.ServiceProvider
-            .GetRequiredService<IEnumerable<IBotHandler>>();
+            .GetRequiredService<IEnumerable<IBotActionHandler>>();
 
         var handler = handlers.FirstOrDefault(
                 h => h.Action == action.Action);
