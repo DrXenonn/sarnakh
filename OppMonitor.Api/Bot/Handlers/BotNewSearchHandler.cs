@@ -3,6 +3,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using OppMonitor.Api.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace OppMonitor.Api.Bot.Handlers;
 
@@ -23,7 +24,11 @@ public class BotNewSearchHandler : IBotHandler
 
     public async Task<Message> HandleAsync(BotAction action)
     {
-        //TODO: delete all the other drafts accosiated with this user.
+        await _dbContext.Processes
+            .Where(p =>
+                p.TelegramUserId == action.UserId &&
+                p.ProcessStatus == ProcessStatus.Draft)
+            .ExecuteDeleteAsync();
 
         var newProcess = new Process
         {
