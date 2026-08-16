@@ -2,7 +2,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using OppMonitor.Api.Bot.Handlers;
-using OppMonitor.Api.Data;
+using OppMonitor.Api.Services;
 
 namespace OppMonitor.Api.Jobs;
 
@@ -10,13 +10,16 @@ public class OperatorBotJob : BackgroundService
 {
     private readonly TelegramBotClient _bot;
     private readonly IServiceScopeFactory _scopeFactory;
+    private readonly BotActionHandlerService _actionHandler;
 
     public OperatorBotJob(
         TelegramBotClient bot,
-        IServiceScopeFactory scopeFactory)
+        IServiceScopeFactory scopeFactory,
+        BotActionHandlerService actionHandler)
     {
         _bot = bot;
         _scopeFactory = scopeFactory;
+        _actionHandler = actionHandler;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -36,7 +39,7 @@ public class OperatorBotJob : BackgroundService
 
         var parts = callback.Data.Split(':');
 
-        return HandleAction(new BotAction(
+        return _actionHandler.HandleAction(new BotAction(
             callback.From.Id,
             parts[0],
             parts.Length > 1 ? parts[1] : null,
@@ -58,19 +61,5 @@ public class OperatorBotJob : BackgroundService
         using var scope = _scopeFactory.CreateScope();
         var handler = scope.ServiceProvider.GetRequiredService<BotMessageHandler>();
         await handler.HandleAsync(message);
-    }
-
-    private async Task HandleAction(BotAction action)
-    {
-        using var scope = _scopeFactory.CreateScope();
-
-        var handlers = scope.ServiceProvider
-            .GetRequiredService<IEnumerable<IBotActionHandler>>();
-
-        var handler = handlers.FirstOrDefault(
-                h => h.Action == action.Action);
-
-        if (handler is not null)
-            await handler.HandleAsync(action);
     }
 }
