@@ -292,8 +292,11 @@ namespace OppMonitor.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ConfigId")
+                    b.Property<Guid?>("ConfigId")
                         .HasColumnType("uuid");
+
+                    b.Property<int>("ProcessInputState")
+                        .HasColumnType("integer");
 
                     b.Property<string>("ProcessStatus")
                         .IsRequired()
@@ -429,8 +432,7 @@ namespace OppMonitor.Api.Migrations
                     b.HasOne("OppMonitor.Api.Models.Config", "Config")
                         .WithMany()
                         .HasForeignKey("ConfigId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Config");
                 });

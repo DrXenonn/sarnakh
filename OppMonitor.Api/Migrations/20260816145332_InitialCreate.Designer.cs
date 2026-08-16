@@ -14,7 +14,7 @@ using OppMonitor.Api.Data;
 namespace OppMonitor.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260815162540_InitialCreate")]
+    [Migration("20260816145332_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -295,8 +295,11 @@ namespace OppMonitor.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ConfigId")
+                    b.Property<Guid?>("ConfigId")
                         .HasColumnType("uuid");
+
+                    b.Property<int>("ProcessInputState")
+                        .HasColumnType("integer");
 
                     b.Property<string>("ProcessStatus")
                         .IsRequired()
@@ -432,8 +435,7 @@ namespace OppMonitor.Api.Migrations
                     b.HasOne("OppMonitor.Api.Models.Config", "Config")
                         .WithMany()
                         .HasForeignKey("ConfigId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Config");
                 });

@@ -273,7 +273,8 @@ namespace OppMonitor.Api.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     TelegramUserId = table.Column<long>(type: "bigint", nullable: false),
                     ProcessStatus = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
-                    ConfigId = table.Column<Guid>(type: "uuid", nullable: false)
+                    ConfigId = table.Column<Guid>(type: "uuid", nullable: true),
+                    ProcessInputState = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {

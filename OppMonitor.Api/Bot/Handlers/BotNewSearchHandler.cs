@@ -2,7 +2,7 @@ using OppMonitor.Api.Data;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
-using Microsoft.EntityFrameworkCore;
+using OppMonitor.Api.Models;
 
 namespace OppMonitor.Api.Bot.Handlers;
 
@@ -21,31 +21,31 @@ public class BotNewSearchHandler : IBotHandler
 
     public string Action => "new_search";
 
-    //TODO: we create an empty process with Draft status and populate it during these steps.
-
     public async Task<Message> HandleAsync(BotAction action)
     {
-        var groupCategories = await _dbContext.TelegramGroupCategories.ToListAsync();
+        //TODO: delete all the other drafts accosiated with this user.
 
-        var buttons = new List<IEnumerable<InlineKeyboardButton>>();
-
-        foreach (var groupCategory in groupCategories)
+        var newProcess = new Process
         {
-            var button = InlineKeyboardButton
-                .WithCallbackData(
-                        $"{groupCategory.Name} ({groupCategory.GroupIds.Count} گروه)",
-                        groupCategory.Id.ToString());
-            buttons.Add([button]);
-        }
+            TelegramUserId = action.UserId,
+            ProcessStatus = ProcessStatus.Draft,
+            ProcessInputState = ProcessInputState.Name
+        };
+
+        await _dbContext.Processes.AddAsync(newProcess);
+        await _dbContext.SaveChangesAsync();
 
         var keyboard = new InlineKeyboardMarkup
         {
-            InlineKeyboard = buttons
+            InlineKeyboard =
+            [
+                [("⬅️ بازگشت به منوی اصلی", "/start")]
+            ]
         };
 
         const string text =
             "🔎 جستجوی جدید\n\n" +
-            "دسته‌بندی موردنظر خود را انتخاب کنید:";
+            "لطفاً یک نام برای جستجوی خود وارد کنید:";
 
         if (action.MessageId is not null)
         {
