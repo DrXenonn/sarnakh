@@ -19,9 +19,7 @@ public class BotPickGroupHandler : IBotActionHandler
         _dbContext = dbContext;
     }
 
-    public string Action => "new_search";
-
-    //TODO: we create an empty process with Draft status and populate it during these steps.
+    public string Action => "select_group";
 
     public async Task<Message> HandleAsync(BotAction action)
     {

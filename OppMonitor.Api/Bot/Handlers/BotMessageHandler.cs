@@ -26,6 +26,65 @@ public class BotMessageHandler
 
     public async Task HandleAsync(Message message)
     {
+        if (message.Text is null)
+            return;
 
+        if (message.Text == "/start")
+        {
+            await _actionHandler.HandleAction(new BotAction(
+                message.From!.Id,
+                "start",
+                null,
+                message.Chat.Id,
+                null
+            ));
+
+            return;
+        }
+
+        var draftProcess = await GetDraftProcess(message.From!.Id);
+
+        if (draftProcess is null)
+            return;
+
+        switch (draftProcess.ProcessInputState)
+        {
+            case ProcessInputState.Name:
+                await HandleNameInput(message, draftProcess);
+                break;
+
+                // case ProcessInputState.Keywords:
+                //     await HandleKeywordsInput(message, draftProcess);
+                //     break;
+                //
+                // case ProcessInputState.ConfigName:
+                //     await HandleConfigNameInput(message, draftProcess);
+                //     break;
+        }
+    }
+
+    private async Task HandleNameInput(Message message, Process draftProcess)
+    {
+        var text = message.Text!;
+        var shortText = text.Length > 20 ? text[..20] : text;
+        draftProcess.Name = shortText;
+        draftProcess.ProcessInputState = ProcessInputState.None;
+        await _dbContext.SaveChangesAsync();
+        await _actionHandler.HandleAction(new BotAction(
+                    message.From!.Id,
+                    "select_group",
+                    draftProcess.Id.ToString(),
+                    message.Chat.Id,
+                    null
+                    ));
+    }
+
+    private async Task<Process?> GetDraftProcess(long userId)
+    {
+        return await _dbContext.Processes
+            .FirstOrDefaultAsync(p =>
+                p.TelegramUserId == userId &&
+                p.ProcessStatus == ProcessStatus.Draft &&
+                p.ProcessInputState != ProcessInputState.None);
     }
 }
