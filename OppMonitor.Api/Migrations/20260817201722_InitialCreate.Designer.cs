@@ -14,7 +14,7 @@ using OppMonitor.Api.Data;
 namespace OppMonitor.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260816223429_InitialCreate")]
+    [Migration("20260817201722_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -295,7 +295,7 @@ namespace OppMonitor.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("ConfigId")
+                    b.Property<Guid>("ConfigId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Name")
@@ -439,7 +439,8 @@ namespace OppMonitor.Api.Migrations
                     b.HasOne("OppMonitor.Api.Models.Config", "Config")
                         .WithMany()
                         .HasForeignKey("ConfigId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Config");
                 });

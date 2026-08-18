@@ -127,8 +127,10 @@ try
     builder.Services.AddSingleton<BotActionHandlerService>();
 
     builder.Services.AddScoped<IBotActionHandler, BotMainmenuHandler>();
-    builder.Services.AddScoped<IBotActionHandler, BotPickGroupHandler>();
+    builder.Services.AddScoped<IBotActionHandler, BotShowGroupCategoriesHandler>();
     builder.Services.AddScoped<IBotActionHandler, BotNewSearchHandler>();
+    builder.Services.AddScoped<IBotActionHandler, BotSelectGroupCategoriesHandler>();
+    builder.Services.AddScoped<IBotActionHandler, BotSelectWeightHandler>();
     builder.Services.AddScoped<BotMessageHandler>();
     builder.Services.AddHostedService<OperatorBotJob>();
 

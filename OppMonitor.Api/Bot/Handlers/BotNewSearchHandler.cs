@@ -32,9 +32,11 @@ public class BotNewSearchHandler : IBotActionHandler
 
         var newProcess = new Process
         {
+            Id = Guid.NewGuid(),
             TelegramUserId = action.UserId,
             ProcessStatus = ProcessStatus.Draft,
-            ProcessInputState = ProcessInputState.Name
+            ProcessInputState = ProcessInputState.Name,
+            Config = new()
         };
 
         await _dbContext.Processes.AddAsync(newProcess);

@@ -292,7 +292,7 @@ namespace OppMonitor.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("ConfigId")
+                    b.Property<Guid>("ConfigId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Name")
@@ -436,7 +436,8 @@ namespace OppMonitor.Api.Migrations
                     b.HasOne("OppMonitor.Api.Models.Config", "Config")
                         .WithMany()
                         .HasForeignKey("ConfigId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Config");
                 });

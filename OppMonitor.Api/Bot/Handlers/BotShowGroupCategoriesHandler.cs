@@ -6,12 +6,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace OppMonitor.Api.Bot.Handlers;
 
-public class BotPickGroupHandler : IBotActionHandler
+public class BotShowGroupCategoriesHandler : IBotActionHandler
 {
     private readonly TelegramBotClient _bot;
     private readonly AppDbContext _dbContext;
 
-    public BotPickGroupHandler(
+    public BotShowGroupCategoriesHandler(
         TelegramBotClient bot,
         AppDbContext dbContext)
     {
@@ -19,7 +19,7 @@ public class BotPickGroupHandler : IBotActionHandler
         _dbContext = dbContext;
     }
 
-    public string Action => "select_group";
+    public string Action => "show_groups";
 
     public async Task<Message> HandleAsync(BotAction action)
     {
@@ -32,7 +32,7 @@ public class BotPickGroupHandler : IBotActionHandler
             var button = InlineKeyboardButton
                 .WithCallbackData(
                         $"{groupCategory.Name} ({groupCategory.GroupIds.Count} گروه)",
-                        groupCategory.Id.ToString());
+                        $"select_groups:{groupCategory.Id}");
             buttons.Add([button]);
         }
 
