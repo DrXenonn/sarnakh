@@ -14,7 +14,7 @@ using OppMonitor.Api.Data;
 namespace OppMonitor.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260817201722_InitialCreate")]
+    [Migration("20260818163257_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -230,23 +230,42 @@ namespace OppMonitor.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Keywords")
-                        .IsRequired()
-                        .HasColumnType("jsonb");
-
                     b.Property<int>("ScoreThreshold")
                         .HasColumnType("integer");
 
                     b.Property<int>("SearchDays")
                         .HasColumnType("integer");
 
-                    b.Property<string>("TelegramChatIds")
+                    b.PrimitiveCollection<List<long>>("TelegramChatIds")
                         .IsRequired()
-                        .HasColumnType("jsonb");
+                        .HasColumnType("bigint[]");
 
                     b.HasKey("Id");
 
                     b.ToTable("Configs", "public");
+                });
+
+            modelBuilder.Entity("OppMonitor.Api.Models.Keyword", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ConfigId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("Weight")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConfigId");
+
+                    b.ToTable("Keywords", "public");
                 });
 
             modelBuilder.Entity("OppMonitor.Api.Models.Lead", b =>
@@ -434,6 +453,17 @@ namespace OppMonitor.Api.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("OppMonitor.Api.Models.Keyword", b =>
+                {
+                    b.HasOne("OppMonitor.Api.Models.Config", "Config")
+                        .WithMany("Keywords")
+                        .HasForeignKey("ConfigId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Config");
+                });
+
             modelBuilder.Entity("OppMonitor.Api.Models.Process", b =>
                 {
                     b.HasOne("OppMonitor.Api.Models.Config", "Config")
@@ -452,6 +482,11 @@ namespace OppMonitor.Api.Migrations
                         .HasForeignKey("ApplicationUserId");
 
                     b.Navigation("ApplicationUser");
+                });
+
+            modelBuilder.Entity("OppMonitor.Api.Models.Config", b =>
+                {
+                    b.Navigation("Keywords");
                 });
 #pragma warning restore 612, 618
         }

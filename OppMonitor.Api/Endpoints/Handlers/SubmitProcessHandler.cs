@@ -18,7 +18,7 @@ public class SubmitProcessHandler
         var newConfig = new Config
         {
             Id = Guid.NewGuid(),
-            Keywords = configDto.Keywords,
+            Keywords = null,
             TelegramChatIds = configDto.TelegramChatIds,
             SearchDays = configDto.SearchDays,
             ScoreThreshold = configDto.ScoreThreshold

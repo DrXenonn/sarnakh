@@ -19,9 +19,9 @@ public class KeywordMatchStep : IPipelineStep
 
         foreach (var keyword in keywords)
         {
-            if (text.Contains(keyword.Key))
+            if (text.Contains(keyword.Text) && keyword.Weight is not null)
             {
-                score += keyword.Value;
+                score += keyword.Weight.Value;
             }
         }
 

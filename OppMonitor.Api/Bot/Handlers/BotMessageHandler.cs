@@ -53,9 +53,9 @@ public class BotMessageHandler
                 await HandleNameInput(message, draftProcess);
                 break;
 
-            case ProcessInputState.Keywords:
-                await HandleKeywordsInput(message, draftProcess);
-                break;
+                // case ProcessInputState.Keywords:
+                //     await HandleKeywordsInput(message, draftProcess);
+                //     break;
 
                 // case ProcessInputState.ConfigName:
                 //     await HandleConfigNameInput(message, draftProcess);
@@ -79,35 +79,35 @@ public class BotMessageHandler
                     ));
     }
 
-    private async Task HandleKeywordsInput(Message message, Process draftProcess)
-    {
-        //TODO: handle input validation
-        var keyword = message.Text!;
-
-        draftProcess.Config.Keywords[keyword] = 0;
-
-        await _dbContext.SaveChangesAsync();//TODO: commit and fix config's keyword(change it from jsonb)
-
-        var keyboard = new InlineKeyboardMarkup
-        {
-            InlineKeyboard =
-            [
-                [
-                InlineKeyboardButton.WithCallbackData("1", $"keyword_weight:1"),
-                InlineKeyboardButton.WithCallbackData("2", $"keyword_weight:2"),
-                InlineKeyboardButton.WithCallbackData("3", $"keyword_weight:3"),
-                InlineKeyboardButton.WithCallbackData("4", $"keyword_weight:4"),
-                InlineKeyboardButton.WithCallbackData("5", $"keyword_weight:5")
-                ]
-            ]
-        };
-
-        await _bot.SendMessage(
-            chatId: message.Chat.Id,
-            text: $"کلمه «{keyword}» چه وزنی داشته باشد؟",
-            replyMarkup: keyboard
-        );
-    }
+    // private async Task HandleKeywordsInput(Message message, Process draftProcess)
+    // {
+    //     //TODO: handle input validation
+    //     var keyword = message.Text!;
+    //
+    //     draftProcess.Config.Keywords[keyword] = 0;
+    //
+    //     await _dbContext.SaveChangesAsync();//TODO: commit and fix config's keyword(change it from jsonb)
+    //
+    //     var keyboard = new InlineKeyboardMarkup
+    //     {
+    //         InlineKeyboard =
+    //         [
+    //             [
+    //             InlineKeyboardButton.WithCallbackData("1", $"keyword_weight:1"),
+    //             InlineKeyboardButton.WithCallbackData("2", $"keyword_weight:2"),
+    //             InlineKeyboardButton.WithCallbackData("3", $"keyword_weight:3"),
+    //             InlineKeyboardButton.WithCallbackData("4", $"keyword_weight:4"),
+    //             InlineKeyboardButton.WithCallbackData("5", $"keyword_weight:5")
+    //             ]
+    //         ]
+    //     };
+    //
+    //     await _bot.SendMessage(
+    //         chatId: message.Chat.Id,
+    //         text: $"کلمه «{keyword}» چه وزنی داشته باشد؟",
+    //         replyMarkup: keyboard
+    //     );
+    // }
     private async Task<Process?> GetDraftProcess(long userId)
     {
         return await _dbContext.Processes

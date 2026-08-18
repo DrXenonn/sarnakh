@@ -41,12 +41,12 @@ public class BotSelectWeightHandler : IBotActionHandler
 
         // Find the keyword that hasn't received a weight yet.
         var keyword = draftProcess.Config.Keywords
-            .FirstOrDefault(kvp => kvp.Value == 0);
+            .FirstOrDefault(k => k.Weight == null);
 
-        if (keyword.Key is null)
+        if (keyword is null)
             throw new InvalidOperationException("No keyword is waiting for a weight.");
 
-        draftProcess.Config.Keywords[keyword.Key] = weight;
+        keyword.Weight = weight;
 
         await _dbContext.SaveChangesAsync();
 
@@ -71,7 +71,7 @@ public class BotSelectWeightHandler : IBotActionHandler
             chatId: action.ChatId,
             messageId: action.MessageId!.Value,
             text:
-                $"✅ وزن کلمه «{keyword.Key}» روی {weight} تنظیم شد.\n\n" +
+                $"✅ وزن کلمه «{keyword.Text}» روی {weight} تنظیم شد.\n\n" +
                 "مرحله بعد را انتخاب کنید:",
             replyMarkup: keyboard
         );

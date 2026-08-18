@@ -67,8 +67,7 @@ namespace OppMonitor.Api.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Keywords = table.Column<string>(type: "jsonb", nullable: false),
-                    TelegramChatIds = table.Column<string>(type: "jsonb", nullable: false),
+                    TelegramChatIds = table.Column<List<long>>(type: "bigint[]", nullable: false),
                     SearchDays = table.Column<int>(type: "integer", nullable: false),
                     ScoreThreshold = table.Column<int>(type: "integer", nullable: false)
                 },
@@ -266,6 +265,28 @@ namespace OppMonitor.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Keywords",
+                schema: "public",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Text = table.Column<string>(type: "text", nullable: false),
+                    Weight = table.Column<int>(type: "integer", nullable: true),
+                    ConfigId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Keywords", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Keywords_Configs_ConfigId",
+                        column: x => x.ConfigId,
+                        principalSchema: "public",
+                        principalTable: "Configs",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Processes",
                 schema: "public",
                 columns: table => new
@@ -334,6 +355,12 @@ namespace OppMonitor.Api.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Keywords_ConfigId",
+                schema: "public",
+                table: "Keywords",
+                column: "ConfigId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Processes_ConfigId",
                 schema: "public",
                 table: "Processes",
@@ -368,6 +395,10 @@ namespace OppMonitor.Api.Migrations
             migrationBuilder.DropTable(
                 name: "AspNetUserTokens",
                 schema: "identity");
+
+            migrationBuilder.DropTable(
+                name: "Keywords",
+                schema: "public");
 
             migrationBuilder.DropTable(
                 name: "Leads",
