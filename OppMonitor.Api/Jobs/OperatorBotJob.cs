@@ -37,8 +37,8 @@ public class OperatorBotJob : BackgroundService
         if (callback?.Data is null || callback.Message is null)
             return Task.CompletedTask;
 
-        Console.WriteLine($"Callback: {callback.Data}");
-        var parts = callback.Data.Split(':');
+
+        var parts = callback.Data.Split(':', 2);
 
         return _actionHandler.HandleAction(new BotAction(
             callback.From.Id,

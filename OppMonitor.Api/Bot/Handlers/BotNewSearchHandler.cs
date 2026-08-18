@@ -30,16 +30,24 @@ public class BotNewSearchHandler : IBotActionHandler
                 p.ProcessStatus == ProcessStatus.Draft)
             .ExecuteDeleteAsync();
 
+        var config = new Config
+        {
+            Id = Guid.NewGuid()
+        };
+
         var newProcess = new Process
         {
             Id = Guid.NewGuid(),
             TelegramUserId = action.UserId,
             ProcessStatus = ProcessStatus.Draft,
             ProcessInputState = ProcessInputState.Name,
-            Config = new()
+            ConfigId = config.Id,
+            Config = config
         };
 
-        await _dbContext.Processes.AddAsync(newProcess);
+        _dbContext.Configs.Add(config);
+        _dbContext.Processes.Add(newProcess);
+
         await _dbContext.SaveChangesAsync();
 
         var keyboard = new InlineKeyboardMarkup
