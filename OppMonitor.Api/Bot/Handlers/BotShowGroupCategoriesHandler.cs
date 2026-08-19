@@ -1,8 +1,6 @@
 using OppMonitor.Api.Data;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.ReplyMarkups;
-using Microsoft.EntityFrameworkCore;
 using OppMonitor.Api.Services;
 
 namespace OppMonitor.Api.Bot.Handlers;

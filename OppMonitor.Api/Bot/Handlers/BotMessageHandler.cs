@@ -3,7 +3,6 @@ using OppMonitor.Api.Data;
 using OppMonitor.Api.Models;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.ReplyMarkups;
 using OppMonitor.Api.Services;
 
 namespace OppMonitor.Api.Bot.Handlers;

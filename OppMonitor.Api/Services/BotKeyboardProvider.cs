@@ -15,14 +15,16 @@ public class BotKeyboardProvider
 
     public async Task<InlineKeyboardMarkup> GetKeywordPacksKeyboard()
     {
-        var keywordPacks = await _dbContext.KeywordPacks.ToListAsync();
+        var keywordPacks = await _dbContext.KeywordPacks
+            .Include(k => k.Keywords)
+            .ToListAsync();
 
         var keyboardButtons = new List<IEnumerable<InlineKeyboardButton>>();
 
-        foreach (var keywrodpack in keywordPacks)
+        foreach (var keywordPack in keywordPacks)
         {
             var button = InlineKeyboardButton.WithCallbackData
-                    ($"{keywrodpack.Name}", $"add_keyword_pack:{keywrodpack.Id}");
+                    ($"{keywordPack.Name}({keywordPack.Keywords.Count} کلمه)", $"add_keyword_pack:{keywordPack.Id}");
 
             keyboardButtons.Add([button]);
         }
