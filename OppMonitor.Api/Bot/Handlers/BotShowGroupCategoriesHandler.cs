@@ -3,6 +3,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using Microsoft.EntityFrameworkCore;
+using OppMonitor.Api.Services;
 
 namespace OppMonitor.Api.Bot.Handlers;
 
@@ -10,36 +11,24 @@ public class BotShowGroupCategoriesHandler : IBotActionHandler
 {
     private readonly TelegramBotClient _bot;
     private readonly AppDbContext _dbContext;
+    private readonly BotKeyboardProvider _keyboardProvider;
+
 
     public BotShowGroupCategoriesHandler(
         TelegramBotClient bot,
-        AppDbContext dbContext)
+        AppDbContext dbContext,
+        BotKeyboardProvider keyboardProvider)
     {
         _bot = bot;
         _dbContext = dbContext;
+        _keyboardProvider = keyboardProvider;
     }
 
     public string Action => "show_groups";
 
     public async Task<Message> HandleAsync(BotAction action)
     {
-        var groupCategories = await _dbContext.TelegramGroupCategories.ToListAsync();
-
-        var buttons = new List<IEnumerable<InlineKeyboardButton>>();
-
-        foreach (var groupCategory in groupCategories)
-        {
-            var button = InlineKeyboardButton
-                .WithCallbackData(
-                        $"{groupCategory.Name} ({groupCategory.GroupIds.Count} گروه)",
-                        $"select_groups:{groupCategory.Id}");
-            buttons.Add([button]);
-        }
-
-        var keyboard = new InlineKeyboardMarkup
-        {
-            InlineKeyboard = buttons
-        };
+        var keyboard = await _keyboardProvider.GetGroupCategoriesKeyboard();
 
         const string text =
             "🔎 جستجوی جدید\n\n" +

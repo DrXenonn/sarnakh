@@ -1,30 +1,27 @@
+using OppMonitor.Api.Services;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.ReplyMarkups;
 
 namespace OppMonitor.Api.Bot.Handlers;
 
 public class BotMainmenuHandler : IBotActionHandler
 {
     private readonly TelegramBotClient _bot;
+    private readonly BotKeyboardProvider _keyboardProvider;
 
-    public BotMainmenuHandler(TelegramBotClient bot)
+    public BotMainmenuHandler(
+        TelegramBotClient bot,
+        BotKeyboardProvider keyboardProvider)
     {
         _bot = bot;
+        _keyboardProvider = keyboardProvider;
     }
 
     public string Action => "start";
 
     public async Task<Message> HandleAsync(BotAction action)
     {
-        var keyboard = new InlineKeyboardMarkup
-        {
-            InlineKeyboard =
-            [
-                [("🔎 جستجوی جدید", "new_search")],
-                [("📋 جستجوهای من", "searches")]
-            ]
-        };
+        var keyboard = _keyboardProvider.GetMainMenuKeyboard();
 
         var text = "چه کاری می‌خواهید انجام دهید؟";
 

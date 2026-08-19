@@ -13,15 +13,18 @@ public class BotMessageHandler
     private readonly AppDbContext _dbContext;
     private readonly TelegramBotClient _bot;
     private readonly BotActionHandlerService _actionHandler;
+    private readonly BotKeyboardProvider _keyboardProvider;
 
     public BotMessageHandler(
         AppDbContext dbContext,
         TelegramBotClient bot,
-        BotActionHandlerService actionHandler)
+        BotActionHandlerService actionHandler,
+        BotKeyboardProvider keyboardProvider)
     {
         _dbContext = dbContext;
         _bot = bot;
         _actionHandler = actionHandler;
+        _keyboardProvider = keyboardProvider;
     }
 
     public async Task HandleAsync(Message message)
@@ -97,19 +100,7 @@ public class BotMessageHandler
 
         await _dbContext.SaveChangesAsync();
 
-        var keyboard = new InlineKeyboardMarkup
-        {
-            InlineKeyboard =
-            [
-                [
-                InlineKeyboardButton.WithCallbackData("1", $"keyword_weight:1:{id}"),
-                InlineKeyboardButton.WithCallbackData("2", $"keyword_weight:2:{id}"),
-                InlineKeyboardButton.WithCallbackData("3", $"keyword_weight:3:{id}"),
-                InlineKeyboardButton.WithCallbackData("4", $"keyword_weight:4:{id}"),
-                InlineKeyboardButton.WithCallbackData("5", $"keyword_weight:5:{id}")
-                ]
-            ]
-        };
+        var keyboard = _keyboardProvider.GetKeywordWeightKeyboard(id);
 
         await _bot.SendMessage(
             chatId: message.Chat.Id,
@@ -117,6 +108,7 @@ public class BotMessageHandler
             replyMarkup: keyboard
         );
     }
+
     private async Task<Process?> GetDraftProcess(long userId)
     {
         return await _dbContext.Processes

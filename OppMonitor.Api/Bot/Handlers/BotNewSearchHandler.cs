@@ -4,6 +4,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.ReplyMarkups;
 using OppMonitor.Api.Models;
 using Microsoft.EntityFrameworkCore;
+using OppMonitor.Api.Services;
 
 namespace OppMonitor.Api.Bot.Handlers;
 
@@ -11,15 +12,17 @@ public class BotNewSearchHandler : IBotActionHandler
 {
     private readonly TelegramBotClient _bot;
     private readonly AppDbContext _dbContext;
+    private readonly BotKeyboardProvider _keyboardProvider;
 
     public BotNewSearchHandler(
         TelegramBotClient bot,
-        AppDbContext dbContext)
+        AppDbContext dbContext,
+        BotKeyboardProvider keyboardProvider)
     {
         _bot = bot;
         _dbContext = dbContext;
+        _keyboardProvider = keyboardProvider;
     }
-
     public string Action => "new_search";
 
     public async Task<Message> HandleAsync(BotAction action)
@@ -50,13 +53,7 @@ public class BotNewSearchHandler : IBotActionHandler
 
         await _dbContext.SaveChangesAsync();
 
-        var keyboard = new InlineKeyboardMarkup
-        {
-            InlineKeyboard =
-            [
-                [("⬅️ بازگشت به منوی اصلی", "/start")]
-            ]
-        };
+        var keyboard = _keyboardProvider.GetBackToMainMenuKeyboard();
 
         const string text =
             "🔎 جستجوی جدید\n\n" +
