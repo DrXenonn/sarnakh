@@ -13,4 +13,7 @@ dotnet ef migrations add InitialCreate
 echo "Applying migration to database..."
 dotnet ef database update
 
-echo "Done. Database reset and recreated."
+echo "Seeding database..."
+docker exec -i app_postgres psql -U app -d app <seed.sql
+
+echo "Done. Database reset and seeded."

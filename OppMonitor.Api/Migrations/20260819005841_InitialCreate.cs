@@ -77,6 +77,19 @@ namespace OppMonitor.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "KeywordPacks",
+                schema: "public",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_KeywordPacks", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Leads",
                 schema: "public",
                 columns: table => new
@@ -265,28 +278,6 @@ namespace OppMonitor.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Keywords",
-                schema: "public",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    Text = table.Column<string>(type: "text", nullable: false),
-                    Weight = table.Column<int>(type: "integer", nullable: true),
-                    ConfigId = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Keywords", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Keywords_Configs_ConfigId",
-                        column: x => x.ConfigId,
-                        principalSchema: "public",
-                        principalTable: "Configs",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Processes",
                 schema: "public",
                 columns: table => new
@@ -308,6 +299,35 @@ namespace OppMonitor.Api.Migrations
                         principalTable: "Configs",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Keywords",
+                schema: "public",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Text = table.Column<string>(type: "text", nullable: false),
+                    Weight = table.Column<int>(type: "integer", nullable: true),
+                    ConfigId = table.Column<Guid>(type: "uuid", nullable: true),
+                    KeywordPackId = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Keywords", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Keywords_Configs_ConfigId",
+                        column: x => x.ConfigId,
+                        principalSchema: "public",
+                        principalTable: "Configs",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Keywords_KeywordPacks_KeywordPackId",
+                        column: x => x.KeywordPackId,
+                        principalSchema: "public",
+                        principalTable: "KeywordPacks",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateIndex(
@@ -359,6 +379,12 @@ namespace OppMonitor.Api.Migrations
                 schema: "public",
                 table: "Keywords",
                 column: "ConfigId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Keywords_KeywordPackId",
+                schema: "public",
+                table: "Keywords",
+                column: "KeywordPackId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Processes_ConfigId",
@@ -423,6 +449,10 @@ namespace OppMonitor.Api.Migrations
             migrationBuilder.DropTable(
                 name: "AspNetRoles",
                 schema: "identity");
+
+            migrationBuilder.DropTable(
+                name: "KeywordPacks",
+                schema: "public");
 
             migrationBuilder.DropTable(
                 name: "Configs",

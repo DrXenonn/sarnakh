@@ -14,7 +14,7 @@ using OppMonitor.Api.Data;
 namespace OppMonitor.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260818163257_InitialCreate")]
+    [Migration("20260819005841_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -251,7 +251,10 @@ namespace OppMonitor.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ConfigId")
+                    b.Property<Guid?>("ConfigId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("KeywordPackId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Text")
@@ -265,7 +268,24 @@ namespace OppMonitor.Api.Migrations
 
                     b.HasIndex("ConfigId");
 
+                    b.HasIndex("KeywordPackId");
+
                     b.ToTable("Keywords", "public");
+                });
+
+            modelBuilder.Entity("OppMonitor.Api.Models.KeywordPack", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("KeywordPacks", "public");
                 });
 
             modelBuilder.Entity("OppMonitor.Api.Models.Lead", b =>
@@ -458,10 +478,15 @@ namespace OppMonitor.Api.Migrations
                     b.HasOne("OppMonitor.Api.Models.Config", "Config")
                         .WithMany("Keywords")
                         .HasForeignKey("ConfigId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("OppMonitor.Api.Models.KeywordPack", "KeywordPack")
+                        .WithMany("Keywords")
+                        .HasForeignKey("KeywordPackId");
 
                     b.Navigation("Config");
+
+                    b.Navigation("KeywordPack");
                 });
 
             modelBuilder.Entity("OppMonitor.Api.Models.Process", b =>
@@ -485,6 +510,11 @@ namespace OppMonitor.Api.Migrations
                 });
 
             modelBuilder.Entity("OppMonitor.Api.Models.Config", b =>
+                {
+                    b.Navigation("Keywords");
+                });
+
+            modelBuilder.Entity("OppMonitor.Api.Models.KeywordPack", b =>
                 {
                     b.Navigation("Keywords");
                 });
