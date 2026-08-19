@@ -15,6 +15,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
         builder.Entity<Lead>().ToTable("Leads", "public");
         builder.Entity<Keyword>().ToTable("Keywords", "public");
         builder.Entity<Config>().ToTable("Configs", "public");
+        builder.Entity<KeywordPack>().ToTable("KeywordPacks", "public");
         builder.Entity<TelegramGroupCategory>().ToTable("TelegramGroupCategories", "public");
         builder.Entity<TelegramGroupCategory>()
             .Property(x => x.GroupIds)
@@ -50,4 +51,5 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<Keyword> Keywords => Set<Keyword>();
     public DbSet<Config> Configs => Set<Config>();
     public DbSet<TelegramGroupCategory> TelegramGroupCategories => Set<TelegramGroupCategory>();
+    public DbSet<KeywordPack> KeywordPacks => Set<KeywordPack>();
 }

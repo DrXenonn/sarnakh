@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using OppMonitor.Api.Data;
 using OppMonitor.Api.Models;
+using OppMonitor.Api.Services;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
@@ -10,13 +11,16 @@ public class BotSelectGroupCategoriesHandler : IBotActionHandler
 {
     private readonly TelegramBotClient _bot;
     private readonly AppDbContext _dbContext;
+    private readonly BotKeyboardProvider _keyboardProvider;
 
     public BotSelectGroupCategoriesHandler(
         TelegramBotClient bot,
-        AppDbContext dbContext)
+        AppDbContext dbContext,
+        BotKeyboardProvider keyboardProvider)
     {
         _bot = bot;
         _dbContext = dbContext;
+        _keyboardProvider = keyboardProvider;
     }
 
     public string Action => "select_groups";
@@ -48,6 +52,7 @@ public class BotSelectGroupCategoriesHandler : IBotActionHandler
 
         return await _bot.EditMessageText(
             chatId: action.ChatId,
+            replyMarkup: await _keyboardProvider.GetKeywordPacksKeyboard(_dbContext),
             messageId: action.MessageId!.Value,
             text:
                 "🔑 لطفاً اولین کلمه کلیدی خود را وارد کنید.\n\n" +

@@ -76,10 +76,10 @@ public class BotSelectWeightHandler : IBotActionHandler
             InlineKeyboard =
             [
                 [
-            InlineKeyboardButton.WithCallbackData(
+                InlineKeyboardButton.WithCallbackData(
                 "📅 انتخاب تعداد روز",
                 "select_search_days")
-        ]
+                ]
             ]
         };
 
