@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using OppMonitor.Api.Data;
 using OppMonitor.Api.Models;
+using OppMonitor.Api.Services;
 using Telegram.Bot;
 using Telegram.Bot.Types;
-using Telegram.Bot.Types.ReplyMarkups;
 
 namespace OppMonitor.Api.Bot.Handlers;
 
@@ -11,13 +11,16 @@ public class BotSelectWeightHandler : IBotActionHandler
 {
     private readonly TelegramBotClient _bot;
     private readonly AppDbContext _dbContext;
+    private readonly BotKeyboardProvider _keyboardProvider;
 
     public BotSelectWeightHandler(
         TelegramBotClient bot,
-        AppDbContext dbContext)
+        AppDbContext dbContext,
+        BotKeyboardProvider keyboardProvider)
     {
         _bot = bot;
         _dbContext = dbContext;
+        _keyboardProvider = keyboardProvider;
     }
 
     public string Action => "keyword_weight";
@@ -71,17 +74,6 @@ public class BotSelectWeightHandler : IBotActionHandler
             keywords.Select(k => $"🔹 {k.Text} — وزن {k.Weight}")
         );
 
-        var keyboard = new InlineKeyboardMarkup
-        {
-            InlineKeyboard =
-            [
-                [
-                InlineKeyboardButton.WithCallbackData(
-                "📅 انتخاب تعداد روز",
-                "select_search_days")
-                ]
-            ]
-        };
 
         return await _bot.EditMessageText(
             chatId: action.ChatId,
@@ -91,7 +83,7 @@ public class BotSelectWeightHandler : IBotActionHandler
                 keywordList +
                 "\n\n" +
                 "➕ برای افزودن کلمه بعدی، آن را ارسال کنید.",
-            replyMarkup: keyboard
+            replyMarkup: await _keyboardProvider.GetKeywordPacksWithDurationPick()
         );
     }
 }

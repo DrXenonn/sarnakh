@@ -6,9 +6,16 @@ namespace OppMonitor.Api.Services;
 
 public class BotKeyboardProvider
 {
-    public async Task<InlineKeyboardMarkup> GetKeywordPacksKeyboard(AppDbContext dbContext)
+    private readonly AppDbContext _dbContext;
+
+    public BotKeyboardProvider(AppDbContext dbContext)
     {
-        var keywordPacks = await dbContext.KeywordPacks.ToListAsync();
+        _dbContext = dbContext;
+    }
+
+    public async Task<InlineKeyboardMarkup> GetKeywordPacksKeyboard()
+    {
+        var keywordPacks = await _dbContext.KeywordPacks.ToListAsync();
 
         var keyboardButtons = new List<IEnumerable<InlineKeyboardButton>>();
 
@@ -27,4 +34,22 @@ public class BotKeyboardProvider
 
         return keyboard;
     }
+
+public async Task<InlineKeyboardMarkup> GetKeywordPacksWithDurationPick()
+{
+    var keywordPacksKeyboard = await GetKeywordPacksKeyboard();
+ 
+    var buttons = keywordPacksKeyboard.InlineKeyboard.ToList();
+
+    buttons.Add(
+        [InlineKeyboardButton.WithCallbackData(
+            "📅 انتخاب تعداد روز",
+            "select_search_days")]
+    );
+
+    return new InlineKeyboardMarkup
+    {
+        InlineKeyboard = buttons
+    };
+}
 }

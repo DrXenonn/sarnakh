@@ -52,7 +52,7 @@ public class BotSelectGroupCategoriesHandler : IBotActionHandler
 
         return await _bot.EditMessageText(
             chatId: action.ChatId,
-            replyMarkup: await _keyboardProvider.GetKeywordPacksKeyboard(_dbContext),
+            replyMarkup: await _keyboardProvider.GetKeywordPacksKeyboard(),
             messageId: action.MessageId!.Value,
             text:
                 "🔑 لطفاً اولین کلمه کلیدی خود را وارد کنید.\n\n" +
