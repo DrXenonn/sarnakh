@@ -13,42 +13,34 @@ public class BotSelectKeywordPack : IBotActionHandler
     private readonly AppDbContext _dbContext;
     private readonly BotKeyboardProvider _keyboardProvider;
     private readonly BotActionHandlerService _botActionHandler;
+    private readonly BotSearchDraftService _draftService;
 
     public BotSelectKeywordPack(
         TelegramBotClient bot,
         AppDbContext dbContext,
         BotKeyboardProvider keyboardProvider,
-        BotActionHandlerService actionHandler)
+        BotActionHandlerService actionHandler,
+        BotSearchDraftService draftService)
     {
         _bot = bot;
         _dbContext = dbContext;
         _keyboardProvider = keyboardProvider;
         _botActionHandler = actionHandler;
+        _draftService = draftService;
     }
 
     public string Action => "add_keyword_pack";
 
     public async Task<Message> HandleAsync(BotAction action)
     {
-        if (action.Data is null)
-            throw new InvalidOperationException("No data for this action.");
+        Guid.TryParse(action.Data, out var keywordPackId);
 
-        if (!Guid.TryParse(action.Data, out var keywordPackId))
-            throw new InvalidOperationException("Invalid id.");
-
-        var draftProcess = await _dbContext.Processes
-            .Include(p => p.Config)
-            .ThenInclude(p => p.Keywords)
-            .FirstOrDefaultAsync(p =>
-                p.TelegramUserId == action.UserId &&
-                p.ProcessStatus == ProcessStatus.Draft);
+        var draftProcess = await _draftService.GetDraftProcessAsync(action.UserId);
 
         if (draftProcess is null)
             throw new InvalidOperationException("Draft process not found.");
 
         draftProcess.ProcessInputState = ProcessInputState.Keywords;
-
-        Console.WriteLine(keywordPackId);
 
         var keywordPack = await _dbContext.KeywordPacks
             .Include(p => p.Keywords)

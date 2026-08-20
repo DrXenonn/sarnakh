@@ -11,7 +11,6 @@ public class BotShowGroupCategoriesHandler : IBotActionHandler
     private readonly AppDbContext _dbContext;
     private readonly BotKeyboardProvider _keyboardProvider;
 
-
     public BotShowGroupCategoriesHandler(
         TelegramBotClient bot,
         AppDbContext dbContext,

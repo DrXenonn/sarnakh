@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using OppMonitor.Api.Data;
 using OppMonitor.Api.Models;
 using OppMonitor.Api.Services;
@@ -13,47 +12,32 @@ public class BotSelectWeightHandler : IBotActionHandler
     private readonly AppDbContext _dbContext;
     private readonly BotKeyboardProvider _keyboardProvider;
     private readonly BotActionHandlerService _botActionHandler;
+    private readonly BotSearchDraftService _draftService;
 
     public BotSelectWeightHandler(
         TelegramBotClient bot,
         AppDbContext dbContext,
         BotKeyboardProvider keyboardProvider,
-        BotActionHandlerService botActionHandler)
+        BotActionHandlerService botActionHandler,
+        BotSearchDraftService draftService)
     {
         _bot = bot;
         _dbContext = dbContext;
         _keyboardProvider = keyboardProvider;
         _botActionHandler = botActionHandler;
+        _draftService = draftService;
     }
 
     public string Action => "keyword_weight";
 
     public async Task<Message> HandleAsync(BotAction action)
     {
-        if (action.Data is null)
-            throw new InvalidOperationException("No data for this action.");
+        var parts = action.Data!.Split(':');
 
-        var parts = action.Data.Split(':');
+        int.TryParse(parts[0], out var weight);
+        Guid.TryParse(parts[1], out var keywordId);
 
-        if (parts.Length != 2)
-            throw new InvalidOperationException("Invalid keyword weight data.");
-
-        if (!int.TryParse(parts[0], out var weight))
-            throw new InvalidOperationException("Invalid weight.");
-
-        if (!Guid.TryParse(parts[1], out var keywordId))
-            throw new InvalidOperationException("Invalid keyword ID.");
-
-        if (weight < 1 || weight > 5)
-            throw new InvalidOperationException(
-                "Keyword weight must be between 1 and 5.");
-
-        var draftProcess = await _dbContext.Processes
-            .Include(p => p.Config)
-            .ThenInclude(p => p.Keywords)
-            .FirstOrDefaultAsync(p =>
-                p.TelegramUserId == action.UserId &&
-                p.ProcessStatus == ProcessStatus.Draft);
+        var draftProcess = await _draftService.GetDraftProcessAsync(action.UserId);
 
         if (draftProcess is null)
             throw new InvalidOperationException("Draft process not found.");

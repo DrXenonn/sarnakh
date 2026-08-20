@@ -12,41 +12,36 @@ public class BotSelectGroupCategoriesHandler : IBotActionHandler
     private readonly TelegramBotClient _bot;
     private readonly AppDbContext _dbContext;
     private readonly BotKeyboardProvider _keyboardProvider;
+    private readonly BotSearchDraftService _draftService;
 
     public BotSelectGroupCategoriesHandler(
         TelegramBotClient bot,
         AppDbContext dbContext,
-        BotKeyboardProvider keyboardProvider)
+        BotKeyboardProvider keyboardProvider,
+        BotSearchDraftService draftService)
     {
         _bot = bot;
         _dbContext = dbContext;
         _keyboardProvider = keyboardProvider;
+        _draftService = draftService;
     }
 
     public string Action => "select_groups";
 
     public async Task<Message> HandleAsync(BotAction action)
     {
-        if (action.Data is null || !Guid.TryParse(action.Data, out var categoryId))
-            throw new InvalidOperationException("Invalid group category ID.");
+        Guid.TryParse(action.Data, out var categoryId);
 
         var category = await _dbContext.TelegramGroupCategories
             .FirstOrDefaultAsync(c => c.Id == categoryId);
 
-        if (category is null)
-            throw new InvalidOperationException("Group category not found.");
+        var draftProcess = await _draftService.GetDraftProcessAsync(action.UserId);
 
-        var draftProcess = await _dbContext.Processes
-            .Include(p => p.Config)
-            .FirstOrDefaultAsync(p =>
-                p.TelegramUserId == action.UserId &&
-                p.ProcessStatus == ProcessStatus.Draft);
-
-        if (draftProcess is null)
-            throw new InvalidOperationException("Draft process not found.");
-
-        draftProcess.Config.TelegramChatIds = category.GroupIds;
-        draftProcess.ProcessInputState = ProcessInputState.Keywords;
+        if (draftProcess is not null && category is not null)
+        {
+            draftProcess.Config.TelegramChatIds = category.GroupIds;
+            draftProcess.ProcessInputState = ProcessInputState.Keywords;
+        }
 
         await _dbContext.SaveChangesAsync();
 
