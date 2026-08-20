@@ -12,15 +12,18 @@ public class BotSelectWeightHandler : IBotActionHandler
     private readonly TelegramBotClient _bot;
     private readonly AppDbContext _dbContext;
     private readonly BotKeyboardProvider _keyboardProvider;
+    private readonly BotShowKeywordsHandler _showKeywordHandler;
 
     public BotSelectWeightHandler(
         TelegramBotClient bot,
         AppDbContext dbContext,
-        BotKeyboardProvider keyboardProvider)
+        BotKeyboardProvider keyboardProvider,
+        BotShowKeywordsHandler keywordsHanlder)
     {
         _bot = bot;
         _dbContext = dbContext;
         _keyboardProvider = keyboardProvider;
+        _showKeywordHandler = keywordsHanlder;
     }
 
     public string Action => "keyword_weight";
@@ -67,23 +70,6 @@ public class BotSelectWeightHandler : IBotActionHandler
 
         await _dbContext.SaveChangesAsync();
 
-        var keywords = draftProcess.Config!.Keywords;
-
-        var keywordList = string.Join(
-            "\n",
-            keywords.Select(k => $"🔹 {k.Text} — وزن {k.Weight}")
-        );
-
-
-        return await _bot.EditMessageText(
-            chatId: action.ChatId,
-            messageId: action.MessageId!.Value,
-            text:
-                "🔑 کلمات کلیدی:\n\n" +
-                keywordList +
-                "\n\n" +
-                "➕ برای افزودن کلمه بعدی، آن را ارسال کنید.",
-            replyMarkup: await _keyboardProvider.GetKeywordPacksWithDurationPick()
-        );
+        return await _showKeywordHandler.HandleAsync(new BotAction(action.UserId, "show_keywords", action.Data, action.ChatId, action.MessageId));
     }
 }

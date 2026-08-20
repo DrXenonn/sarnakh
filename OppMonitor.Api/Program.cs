@@ -126,15 +126,16 @@ try
 
     builder.Services.AddSingleton<BotActionHandlerService>();
 
+    builder.Services.AddScoped<BotKeyboardProvider>();
     builder.Services.AddScoped<IBotActionHandler, BotMainmenuHandler>();
     builder.Services.AddScoped<IBotActionHandler, BotShowGroupCategoriesHandler>();
     builder.Services.AddScoped<IBotActionHandler, BotNewSearchHandler>();
     builder.Services.AddScoped<IBotActionHandler, BotSelectGroupCategoriesHandler>();
     builder.Services.AddScoped<IBotActionHandler, BotSelectWeightHandler>();
-    builder.Services.AddScoped<BotKeyboardProvider>();
+    builder.Services.AddScoped<IBotActionHandler, BotAddKeywordPack>();
+    builder.Services.AddScoped<BotShowKeywordsHandler>();
     builder.Services.AddScoped<BotMessageHandler>();
     builder.Services.AddHostedService<OperatorBotJob>();
-
 
     var app = builder.Build();
     app.UseSerilogRequestLogging();
