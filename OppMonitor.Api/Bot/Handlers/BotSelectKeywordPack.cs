@@ -7,23 +7,23 @@ using Telegram.Bot.Types;
 
 namespace OppMonitor.Api.Bot.Handlers;
 
-public class BotAddKeywordPack : IBotActionHandler
+public class BotSelectKeywordPack : IBotActionHandler
 {
     private readonly TelegramBotClient _bot;
     private readonly AppDbContext _dbContext;
     private readonly BotKeyboardProvider _keyboardProvider;
-    private readonly BotShowKeywordsHandler _showKeywordHandler;
+    private readonly BotActionHandlerService _botActionHandler;
 
-    public BotAddKeywordPack(
+    public BotSelectKeywordPack(
         TelegramBotClient bot,
         AppDbContext dbContext,
         BotKeyboardProvider keyboardProvider,
-        BotShowKeywordsHandler showKeyword)
+        BotActionHandlerService actionHandler)
     {
         _bot = bot;
         _dbContext = dbContext;
         _keyboardProvider = keyboardProvider;
-        _showKeywordHandler = showKeyword;
+        _botActionHandler = actionHandler;
     }
 
     public string Action => "add_keyword_pack";
@@ -33,10 +33,8 @@ public class BotAddKeywordPack : IBotActionHandler
         if (action.Data is null)
             throw new InvalidOperationException("No data for this action.");
 
-        var parts = action.Data.Split(':');
-
-        if (!int.TryParse(parts[0], out var keywordPackId))
-            throw new InvalidOperationException("Invalid Id for keyword pack.");
+        if (!Guid.TryParse(action.Data, out var keywordPackId))
+            throw new InvalidOperationException("Invalid id.");
 
         var draftProcess = await _dbContext.Processes
             .Include(p => p.Config)
@@ -48,13 +46,36 @@ public class BotAddKeywordPack : IBotActionHandler
         if (draftProcess is null)
             throw new InvalidOperationException("Draft process not found.");
 
-        var keywordPack = await _dbContext.KeywordPacks.FindAsync(keywordPackId);
+        draftProcess.ProcessInputState = ProcessInputState.Keywords;
+
+        Console.WriteLine(keywordPackId);
+
+        var keywordPack = await _dbContext.KeywordPacks
+            .Include(p => p.Keywords)
+            .FirstOrDefaultAsync(p => p.Id == keywordPackId);
 
         if (keywordPack is not null)
-            await _dbContext.Keywords.AddRangeAsync(keywordPack.Keywords);
+            foreach (var packKeyword in keywordPack.Keywords)
+            {
+                _dbContext.Keywords.Add(new Keyword
+                {
+                    Id = Guid.NewGuid(),
+                    Text = packKeyword.Text,
+                    Weight = packKeyword.Weight,
+                    ConfigId = draftProcess.Config!.Id
+                });
+            }
 
         await _dbContext.SaveChangesAsync();
 
-        return await _showKeywordHandler.HandleAsync(new BotAction(action.UserId, "show_keywords", action.Data, action.ChatId, action.MessageId));
+        return await _botActionHandler.HandleAction(
+            new BotAction(
+                action.UserId,
+                "show_keywords",
+                null,
+                action.ChatId,
+                action.MessageId
+            )
+        );
     }
 }

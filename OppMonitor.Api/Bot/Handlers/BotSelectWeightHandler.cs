@@ -12,18 +12,18 @@ public class BotSelectWeightHandler : IBotActionHandler
     private readonly TelegramBotClient _bot;
     private readonly AppDbContext _dbContext;
     private readonly BotKeyboardProvider _keyboardProvider;
-    private readonly BotShowKeywordsHandler _showKeywordHandler;
+    private readonly BotActionHandlerService _botActionHandler;
 
     public BotSelectWeightHandler(
         TelegramBotClient bot,
         AppDbContext dbContext,
         BotKeyboardProvider keyboardProvider,
-        BotShowKeywordsHandler keywordsHanlder)
+        BotActionHandlerService botActionHandler)
     {
         _bot = bot;
         _dbContext = dbContext;
         _keyboardProvider = keyboardProvider;
-        _showKeywordHandler = keywordsHanlder;
+        _botActionHandler = botActionHandler;
     }
 
     public string Action => "keyword_weight";
@@ -70,6 +70,11 @@ public class BotSelectWeightHandler : IBotActionHandler
 
         await _dbContext.SaveChangesAsync();
 
-        return await _showKeywordHandler.HandleAsync(new BotAction(action.UserId, "show_keywords", action.Data, action.ChatId, action.MessageId));
+        return await _botActionHandler.HandleAction(new BotAction(
+                    action.UserId,
+                    "show_keywords",
+                    null,
+                    action.ChatId,
+                    action.MessageId));
     }
 }

@@ -1,4 +1,5 @@
 using OppMonitor.Api.Bot.Handlers;
+using Telegram.Bot.Types;
 
 namespace OppMonitor.Api.Services;
 
@@ -11,7 +12,7 @@ public class BotActionHandlerService
         _scopeFactory = scopeFactory;
     }
 
-    public async Task HandleAction(BotAction action)
+    public async Task<Message> HandleAction(BotAction action)
     {
         using var scope = _scopeFactory.CreateScope();
 
@@ -19,9 +20,12 @@ public class BotActionHandlerService
             .GetRequiredService<IEnumerable<IBotActionHandler>>();
 
         var handler = handlers.FirstOrDefault(
-                h => h.Action == action.Action);
+            h => h.Action == action.Action);
 
-        if (handler is not null)
-            await handler.HandleAsync(action);
+        if (handler is null)
+            throw new InvalidOperationException(
+                $"No handler found for action: {action.Action}");
+
+        return await handler.HandleAsync(action);
     }
 }
