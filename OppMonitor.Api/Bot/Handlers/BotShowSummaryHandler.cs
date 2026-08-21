@@ -2,6 +2,7 @@ using OppMonitor.Api.Data;
 using OppMonitor.Api.Services;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+
 namespace OppMonitor.Api.Bot.Handlers;
 
 public class BotShowSummaryHandler : IBotActionHandler
@@ -45,7 +46,8 @@ public class BotShowSummaryHandler : IBotActionHandler
             $"📋 خلاصه جستجو\n\n" +
             $"🔎 نام: {draftProcess.Name}\n\n" +
             $"🔑 کلمات:\n{keywords}\n\n" +
-            $"🎯 حداقل امتیاز: {config.ScoreThreshold}",
+            $"🎯 حداقل امتیاز: {config.ScoreThreshold}\n" +
+            $"⏳ بازه جستجو: {config.SearchDays} روز اخیر",
             replyMarkup: _keyboardProvider.GetSummaryKeyboard()
         );
     }

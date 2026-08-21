@@ -27,5 +27,5 @@ public enum ProcessInputState
     Name,
     Keywords,
     ScoreThreshold,
-    ConfigName
+    SearchDays
 }

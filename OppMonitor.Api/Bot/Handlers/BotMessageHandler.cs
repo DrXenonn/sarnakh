@@ -62,9 +62,9 @@ public class BotMessageHandler
             case ProcessInputState.ScoreThreshold:
                 await HandleScoreThresholdInput(message, draftProcess);
                 break;
-                // case ProcessInputState.ConfigName:
-                //     await HandleConfigNameInput(message, draftProcess);
-                //     break;
+            case ProcessInputState.SearchDays:
+                await HandleSearchDaysInput(message, draftProcess);
+                break;
         }
     }
 
@@ -123,6 +123,38 @@ public class BotMessageHandler
         }
 
         draftProcess.Config!.ScoreThreshold = threshold;
+        draftProcess.ProcessInputState = ProcessInputState.None;
+
+        await _dbContext.SaveChangesAsync();
+
+        await _actionHandler.HandleAction(
+            new BotAction(
+                message.From!.Id,
+                "select_search_days",
+                null,
+                message.Chat.Id,
+                null
+            )
+        );
+    }
+
+    private async Task HandleSearchDaysInput(
+        Message message,
+        Process draftProcess)
+    {
+        if (!int.TryParse(message.Text, out var days) ||
+            days < 1 ||
+            days > 365)
+        {
+            await _bot.SendMessage(
+                message.Chat.Id,
+                "لطفاً تعداد روز را به صورت عددی بین ۱ تا ۳۶۵ وارد کنید."
+            );
+
+            return;
+        }
+
+        draftProcess.Config!.SearchDays = days;
         draftProcess.ProcessInputState = ProcessInputState.None;
 
         await _dbContext.SaveChangesAsync();
