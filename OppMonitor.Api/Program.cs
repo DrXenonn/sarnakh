@@ -138,7 +138,9 @@ try
     builder.Services.AddScoped<IBotActionHandler, BotSelectScoreThreshold>();
     builder.Services.AddScoped<IBotActionHandler, BotShowSummaryHandler>();
     builder.Services.AddScoped<IBotActionHandler, BotSelectSearchDaysHandler>();
+    builder.Services.AddScoped<IBotActionHandler, BotStartProcessHandler>();
     builder.Services.AddScoped<BotMessageHandler>();
+    builder.Services.AddScoped<RedisCommandQueueService>();
     builder.Services.AddHostedService<OperatorBotJob>();
 
     var app = builder.Build();
