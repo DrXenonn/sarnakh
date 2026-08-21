@@ -1,6 +1,6 @@
+using Microsoft.EntityFrameworkCore;
 using OppMonitor.Api.Data;
 using Telegram.Bot.Types.ReplyMarkups;
-using Microsoft.EntityFrameworkCore;
 
 namespace OppMonitor.Api.Services;
 
@@ -19,35 +19,36 @@ public class BotKeyboardProvider
             .Include(k => k.Keywords)
             .ToListAsync();
 
-        var keyboardButtons = new List<IEnumerable<InlineKeyboardButton>>();
+        var buttons = new List<IEnumerable<InlineKeyboardButton>>();
 
         foreach (var keywordPack in keywordPacks)
         {
-            var button = InlineKeyboardButton.WithCallbackData
-                    ($"{keywordPack.Name}({keywordPack.Keywords.Count} کلمه)", $"add_keyword_pack:{keywordPack.Id}");
-
-            keyboardButtons.Add([button]);
+            buttons.Add(
+            [
+                InlineKeyboardButton.WithCallbackData(
+                    $"{keywordPack.Name} ({keywordPack.Keywords.Count} کلمه)",
+                    $"add_keyword_pack:{keywordPack.Id}")
+            ]);
         }
 
-        var keyboard = new InlineKeyboardMarkup
+        return new InlineKeyboardMarkup
         {
-            InlineKeyboard = keyboardButtons
+            InlineKeyboard = buttons
         };
-
-        return keyboard;
     }
 
-    public async Task<InlineKeyboardMarkup> GetKeywordPacksWithScorePick()
+    public async Task<InlineKeyboardMarkup> GetKeywordSelectionKeyboard()
     {
         var keywordPacksKeyboard = await GetKeywordPacksKeyboard();
 
         var buttons = keywordPacksKeyboard.InlineKeyboard.ToList();
 
         buttons.Add(
-            [InlineKeyboardButton.WithCallbackData(
-            "✅ مرحله بعدی (انتخاب حد امتیاز)",
-            "select_score_threshold")]
-        );
+        [
+            InlineKeyboardButton.WithCallbackData(
+                "✅ مرحله بعدی (انتخاب حد امتیاز)",
+                "select_score_threshold")
+        ]);
 
         return new InlineKeyboardMarkup
         {
@@ -64,11 +65,12 @@ public class BotKeyboardProvider
 
         foreach (var groupCategory in groupCategories)
         {
-            var button = InlineKeyboardButton.WithCallbackData(
-                $"{groupCategory.Name} ({groupCategory.GroupIds.Count} گروه)",
-                $"select_groups:{groupCategory.Id}");
-
-            buttons.Add([button]);
+            buttons.Add(
+            [
+                InlineKeyboardButton.WithCallbackData(
+                    $"{groupCategory.Name} ({groupCategory.GroupIds.Count} گروه)",
+                    $"select_groups:{groupCategory.Id}")
+            ]);
         }
 
         return new InlineKeyboardMarkup
@@ -83,7 +85,11 @@ public class BotKeyboardProvider
         {
             InlineKeyboard =
             [
-                [("⬅️ بازگشت به منوی اصلی", "/start")]
+                [
+                    InlineKeyboardButton.WithCallbackData(
+                        "⬅️ بازگشت به منوی اصلی",
+                        "start")
+                ]
             ]
         };
     }
@@ -94,8 +100,16 @@ public class BotKeyboardProvider
         {
             InlineKeyboard =
             [
-                [("🔎 جستجوی جدید", "new_search")],
-            [("📋 جستجوهای من", "searches")]
+                [
+                    InlineKeyboardButton.WithCallbackData(
+                        "🔎 جستجوی جدید",
+                        "new_search")
+                ],
+                [
+                    InlineKeyboardButton.WithCallbackData(
+                        "📋 جستجوهای من",
+                        "searches")
+                ]
             ]
         };
     }
@@ -107,12 +121,46 @@ public class BotKeyboardProvider
             InlineKeyboard =
             [
                 [
-                InlineKeyboardButton.WithCallbackData("1", $"keyword_weight:1:{keywordId}"),
-                InlineKeyboardButton.WithCallbackData("2", $"keyword_weight:2:{keywordId}"),
-                InlineKeyboardButton.WithCallbackData("3", $"keyword_weight:3:{keywordId}"),
-                InlineKeyboardButton.WithCallbackData("4", $"keyword_weight:4:{keywordId}"),
-                InlineKeyboardButton.WithCallbackData("5", $"keyword_weight:5:{keywordId}")
+                    InlineKeyboardButton.WithCallbackData(
+                        "1",
+                        $"keyword_weight:1:{keywordId}"),
+
+                    InlineKeyboardButton.WithCallbackData(
+                        "2",
+                        $"keyword_weight:2:{keywordId}"),
+
+                    InlineKeyboardButton.WithCallbackData(
+                        "3",
+                        $"keyword_weight:3:{keywordId}"),
+
+                    InlineKeyboardButton.WithCallbackData(
+                        "4",
+                        $"keyword_weight:4:{keywordId}"),
+
+                    InlineKeyboardButton.WithCallbackData(
+                        "5",
+                        $"keyword_weight:5:{keywordId}")
+                ]
             ]
+        };
+    }
+
+    public InlineKeyboardMarkup GetSummaryKeyboard()
+    {
+        return new InlineKeyboardMarkup
+        {
+            InlineKeyboard =
+            [
+                [
+                    InlineKeyboardButton.WithCallbackData(
+                        "🚀 شروع جستجو",
+                        "start_process")
+                ],
+                [
+                    InlineKeyboardButton.WithCallbackData(
+                        " انصراف و بازگشت",
+                        "start")
+                ]
             ]
         };
     }

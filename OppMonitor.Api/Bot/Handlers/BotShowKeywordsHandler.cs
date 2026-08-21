@@ -48,7 +48,7 @@ public class BotShowKeywordsHandler : IBotActionHandler
                 keywordList +
                 "\n\n" +
                 "➕ برای افزودن کلمه بعدی، آن را ارسال کنید.",
-            replyMarkup: await _keyboardProvider.GetKeywordPacksWithScorePick()
+            replyMarkup: await _keyboardProvider.GetKeywordSelectionKeyboard()
         );
     }
 }
