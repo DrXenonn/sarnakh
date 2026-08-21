@@ -17,6 +17,7 @@ public class ProcessManager
     {
         return await _dbContext.Processes
             .Include(p => p.Config)
+            .ThenInclude(c => c.Keywords)
             .FirstOrDefaultAsync(p => p.Id == processId);
     }
 
