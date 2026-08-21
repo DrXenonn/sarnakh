@@ -37,7 +37,7 @@ public class BotKeyboardProvider
         return keyboard;
     }
 
-    public async Task<InlineKeyboardMarkup> GetKeywordPacksWithDurationPick()
+    public async Task<InlineKeyboardMarkup> GetKeywordPacksWithScorePick()
     {
         var keywordPacksKeyboard = await GetKeywordPacksKeyboard();
 
@@ -45,8 +45,8 @@ public class BotKeyboardProvider
 
         buttons.Add(
             [InlineKeyboardButton.WithCallbackData(
-            "📅 انتخاب تعداد روز",
-            "select_search_days")]
+            "✅ مرحله بعدی (انتخاب حد امتیاز)",
+            "select_score_threshold")]
         );
 
         return new InlineKeyboardMarkup

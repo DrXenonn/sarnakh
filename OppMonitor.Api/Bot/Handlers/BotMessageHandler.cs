@@ -59,6 +59,9 @@ public class BotMessageHandler
                 await HandleKeywordsInput(message, draftProcess);
                 break;
 
+            case ProcessInputState.ScoreThreshold:
+                await HandleScoreThresholdInput(message, draftProcess);
+                break;
                 // case ProcessInputState.ConfigName:
                 //     await HandleConfigNameInput(message, draftProcess);
                 //     break;
@@ -105,6 +108,33 @@ public class BotMessageHandler
             chatId: message.Chat.Id,
             text: $"کلمه «{keyword}» چه وزنی داشته باشد؟",
             replyMarkup: keyboard
+        );
+    }
+
+    private async Task HandleScoreThresholdInput(Message message, Process draftProcess)
+    {
+        if (!int.TryParse(message.Text, out var threshold))
+        {
+            await _bot.SendMessage(
+                message.Chat.Id,
+                "لطفاً یک عدد وارد کنید."
+            );
+            return;
+        }
+
+        draftProcess.Config!.ScoreThreshold = threshold;
+        draftProcess.ProcessInputState = ProcessInputState.None;
+
+        await _dbContext.SaveChangesAsync();
+
+        await _actionHandler.HandleAction(
+            new BotAction(
+                message.From!.Id,
+                "show_summary",
+                null,
+                message.Chat.Id,
+                null
+            )
         );
     }
 

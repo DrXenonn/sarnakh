@@ -135,6 +135,7 @@ try
     builder.Services.AddScoped<IBotActionHandler, BotSelectWeightHandler>();
     builder.Services.AddScoped<IBotActionHandler, BotSelectKeywordPack>();
     builder.Services.AddScoped<IBotActionHandler, BotShowKeywordsHandler>();
+    builder.Services.AddScoped<IBotActionHandler, BotSelectScoreThreshold>();
     builder.Services.AddScoped<BotMessageHandler>();
     builder.Services.AddHostedService<OperatorBotJob>();
 

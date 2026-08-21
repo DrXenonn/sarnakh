@@ -26,5 +26,6 @@ public enum ProcessInputState
     None,
     Name,
     Keywords,
+    ScoreThreshold,
     ConfigName
 }
