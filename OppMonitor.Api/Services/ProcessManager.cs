@@ -13,6 +13,16 @@ public class ProcessManager
         _dbContext = dbContext;
     }
 
+    public async Task<List<Process>> GetProcessesForTelegramUserAsync(long userId)
+    {
+        return await _dbContext.Processes
+            .Include(p => p.Config)
+            .ThenInclude(c => c.Keywords)
+            .Where(p =>
+                p.TelegramUserId == userId)
+            .ToListAsync();
+    }
+
     public async Task<Process?> GetProcessAsync(Guid processId)
     {
         return await _dbContext.Processes
@@ -46,5 +56,18 @@ public class ProcessManager
 
         process.ProcessStatus = newStatus;
         await _dbContext.SaveChangesAsync();
+    }
+
+    public string GetStatusText(ProcessStatus status)
+    {
+        return status switch
+        {
+            ProcessStatus.Draft => "📝 پیش‌نویس",
+            ProcessStatus.Running => "🟢 در حال اجرا",
+            ProcessStatus.Stopped => "⏹️ متوقف شده",
+            ProcessStatus.Completed => "✅ تکمیل شده",
+            ProcessStatus.Failed => "❌ ناموفق",
+            _ => "❓ نامشخص"
+        };
     }
 }

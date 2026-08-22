@@ -7,10 +7,12 @@ namespace OppMonitor.Api.Services;
 public class BotKeyboardProvider
 {
     private readonly AppDbContext _dbContext;
+    private readonly ProcessManager _processManager;
 
-    public BotKeyboardProvider(AppDbContext dbContext)
+    public BotKeyboardProvider(AppDbContext dbContext, ProcessManager processManager)
     {
         _dbContext = dbContext;
+        _processManager = processManager;
     }
 
     public async Task<InlineKeyboardMarkup> GetKeywordPacksKeyboard()
@@ -70,6 +72,28 @@ public class BotKeyboardProvider
                 InlineKeyboardButton.WithCallbackData(
                     $"{groupCategory.Name} ({groupCategory.GroupIds.Count} گروه)",
                     $"select_groups:{groupCategory.Id}")
+            ]);
+        }
+
+        return new InlineKeyboardMarkup
+        {
+            InlineKeyboard = buttons
+        };
+    }
+
+    public async Task<InlineKeyboardMarkup> GetProcessesKeyboard(long userId)
+    {
+        var processes = await _processManager.GetProcessesForTelegramUserAsync(userId);
+
+        var buttons = new List<IEnumerable<InlineKeyboardButton>>();
+
+        foreach (var process in processes)
+        {
+            buttons.Add(
+            [
+                InlineKeyboardButton.WithCallbackData(
+                $"{process.Name} ({_processManager.GetStatusText(process.ProcessStatus)})",
+                $"manage_process:{process.Id}")
             ]);
         }
 

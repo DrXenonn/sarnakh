@@ -17,6 +17,7 @@ using StackExchange.Redis;
 using Telegram.Bot;
 using OppMonitor.Api.Bot.Handlers;
 using OppMonitor.Api.Bot.Handlers.ProcessCreation;
+using OppMonitor.Api.Bot.Handlers.ProcessManagement;
 
 // Serilog
 Log.Logger = new LoggerConfiguration()
@@ -139,6 +140,7 @@ try
     builder.Services.AddScoped<IBotActionHandler, BotShowSummaryHandler>();
     builder.Services.AddScoped<IBotActionHandler, BotSelectSearchDaysHandler>();
     builder.Services.AddScoped<IBotActionHandler, BotStartProcessHandler>();
+    builder.Services.AddScoped<IBotActionHandler, BotShowSearchesHandler>();
     builder.Services.AddScoped<BotMessageHandler>();
     builder.Services.AddScoped<RedisCommandQueueService>();
     builder.Services.AddHostedService<OperatorBotJob>();
