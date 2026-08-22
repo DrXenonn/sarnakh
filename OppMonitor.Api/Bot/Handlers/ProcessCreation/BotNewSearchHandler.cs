@@ -5,7 +5,7 @@ using OppMonitor.Api.Models;
 using Microsoft.EntityFrameworkCore;
 using OppMonitor.Api.Services;
 
-namespace OppMonitor.Api.Bot.Handlers;
+namespace OppMonitor.Api.Bot.Handlers.ProcessCreation;
 
 public class BotNewSearchHandler : IBotActionHandler
 {

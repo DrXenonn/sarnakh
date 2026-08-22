@@ -3,7 +3,7 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using OppMonitor.Api.Services;
 
-namespace OppMonitor.Api.Bot.Handlers;
+namespace OppMonitor.Api.Bot.Handlers.ProcessCreation;
 
 public class BotShowGroupCategoriesHandler : IBotActionHandler
 {

@@ -5,7 +5,7 @@ using OppMonitor.Api.Services;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 
-namespace OppMonitor.Api.Bot.Handlers;
+namespace OppMonitor.Api.Bot.Handlers.ProcessCreation;
 
 public class BotSelectKeywordPack : IBotActionHandler
 {
