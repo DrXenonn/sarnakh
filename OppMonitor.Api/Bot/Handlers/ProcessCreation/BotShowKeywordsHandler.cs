@@ -10,25 +10,25 @@ public class BotShowKeywordsHandler : IBotActionHandler
     private readonly TelegramBotClient _bot;
     private readonly AppDbContext _dbContext;
     private readonly BotKeyboardProvider _keyboardProvider;
-    private readonly BotSearchDraftService _draftService;
+    private readonly ProcessManager _processManager;
 
     public BotShowKeywordsHandler(
         TelegramBotClient bot,
         AppDbContext dbContext,
         BotKeyboardProvider keyboardProvider,
-        BotSearchDraftService draftService)
+        ProcessManager processManager)
     {
         _bot = bot;
         _dbContext = dbContext;
         _keyboardProvider = keyboardProvider;
-        _draftService = draftService;
+        _processManager = processManager;
     }
 
     public string Action => "show_keywords";
 
     public async Task<Message> HandleAsync(BotAction action)
     {
-        var draftProcess = await _draftService.GetDraftProcessAsync(action.UserId);
+        var draftProcess = await _processManager.GetDraftProcessAsync(action.UserId);
 
         if (draftProcess is null)
             throw new InvalidOperationException("Draft process not found.");

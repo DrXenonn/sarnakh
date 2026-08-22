@@ -108,7 +108,7 @@ public class BotKeyboardProvider
                 [
                     InlineKeyboardButton.WithCallbackData(
                         "📋 جستجوهای من",
-                        "searches")
+                        "show_searches")
                 ]
             ]
         };

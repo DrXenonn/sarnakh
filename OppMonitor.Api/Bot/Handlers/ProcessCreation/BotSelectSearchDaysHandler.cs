@@ -10,23 +10,23 @@ public class BotSelectSearchDaysHandler : IBotActionHandler
 {
     private readonly TelegramBotClient _bot;
     private readonly AppDbContext _dbContext;
-    private readonly BotSearchDraftService _draftService;
+    private readonly ProcessManager _processManager;
 
     public BotSelectSearchDaysHandler(
         TelegramBotClient bot,
         AppDbContext dbContext,
-        BotSearchDraftService draftService)
+        ProcessManager processManager)
     {
         _bot = bot;
         _dbContext = dbContext;
-        _draftService = draftService;
+        _processManager = processManager;
     }
 
     public string Action => "select_search_days";
 
     public async Task<Message> HandleAsync(BotAction action)
     {
-        var draftProcess = await _draftService.GetDraftProcessAsync(action.UserId);
+        var draftProcess = await _processManager.GetDraftProcessAsync(action.UserId);
 
         if (draftProcess is null)
             throw new InvalidOperationException("Draft process not found.");

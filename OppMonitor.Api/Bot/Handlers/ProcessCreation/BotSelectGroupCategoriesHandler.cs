@@ -12,18 +12,18 @@ public class BotSelectGroupCategoriesHandler : IBotActionHandler
     private readonly TelegramBotClient _bot;
     private readonly AppDbContext _dbContext;
     private readonly BotKeyboardProvider _keyboardProvider;
-    private readonly BotSearchDraftService _draftService;
+    private readonly ProcessManager _processManager;
 
     public BotSelectGroupCategoriesHandler(
         TelegramBotClient bot,
         AppDbContext dbContext,
         BotKeyboardProvider keyboardProvider,
-        BotSearchDraftService draftService)
+        ProcessManager processManager)
     {
         _bot = bot;
         _dbContext = dbContext;
         _keyboardProvider = keyboardProvider;
-        _draftService = draftService;
+        _processManager = processManager;
     }
 
     public string Action => "select_groups";
@@ -35,7 +35,7 @@ public class BotSelectGroupCategoriesHandler : IBotActionHandler
         var category = await _dbContext.TelegramGroupCategories
             .FirstOrDefaultAsync(c => c.Id == categoryId);
 
-        var draftProcess = await _draftService.GetDraftProcessAsync(action.UserId);
+        var draftProcess = await _processManager.GetDraftProcessAsync(action.UserId);
 
         if (draftProcess is not null && category is not null)
         {

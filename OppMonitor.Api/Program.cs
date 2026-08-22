@@ -128,7 +128,6 @@ try
     builder.Services.AddSingleton<BotActionHandlerService>();
 
     builder.Services.AddScoped<BotKeyboardProvider>();
-    builder.Services.AddScoped<BotSearchDraftService>();
     builder.Services.AddScoped<IBotActionHandler, BotMainmenuHandler>();
     builder.Services.AddScoped<IBotActionHandler, BotShowGroupCategoriesHandler>();
     builder.Services.AddScoped<IBotActionHandler, BotNewSearchHandler>();

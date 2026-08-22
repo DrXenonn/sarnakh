@@ -13,20 +13,20 @@ public class BotSelectKeywordPack : IBotActionHandler
     private readonly AppDbContext _dbContext;
     private readonly BotKeyboardProvider _keyboardProvider;
     private readonly BotActionHandlerService _botActionHandler;
-    private readonly BotSearchDraftService _draftService;
+    private readonly ProcessManager _processManager;
 
     public BotSelectKeywordPack(
         TelegramBotClient bot,
         AppDbContext dbContext,
         BotKeyboardProvider keyboardProvider,
         BotActionHandlerService actionHandler,
-        BotSearchDraftService draftService)
+        ProcessManager processManager)
     {
         _bot = bot;
         _dbContext = dbContext;
         _keyboardProvider = keyboardProvider;
         _botActionHandler = actionHandler;
-        _draftService = draftService;
+        _processManager = processManager;
     }
 
     public string Action => "add_keyword_pack";
@@ -35,7 +35,7 @@ public class BotSelectKeywordPack : IBotActionHandler
     {
         Guid.TryParse(action.Data, out var keywordPackId);
 
-        var draftProcess = await _draftService.GetDraftProcessAsync(action.UserId);
+        var draftProcess = await _processManager.GetDraftProcessAsync(action.UserId);
 
         if (draftProcess is null)
             throw new InvalidOperationException("Draft process not found.");

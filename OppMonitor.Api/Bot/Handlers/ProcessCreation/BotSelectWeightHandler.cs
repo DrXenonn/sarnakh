@@ -12,20 +12,20 @@ public class BotSelectWeightHandler : IBotActionHandler
     private readonly AppDbContext _dbContext;
     private readonly BotKeyboardProvider _keyboardProvider;
     private readonly BotActionHandlerService _botActionHandler;
-    private readonly BotSearchDraftService _draftService;
+    private readonly ProcessManager _processManager;
 
     public BotSelectWeightHandler(
         TelegramBotClient bot,
         AppDbContext dbContext,
         BotKeyboardProvider keyboardProvider,
         BotActionHandlerService botActionHandler,
-        BotSearchDraftService draftService)
+        ProcessManager processManager)
     {
         _bot = bot;
         _dbContext = dbContext;
         _keyboardProvider = keyboardProvider;
         _botActionHandler = botActionHandler;
-        _draftService = draftService;
+        _processManager = processManager;
     }
 
     public string Action => "keyword_weight";
@@ -37,7 +37,7 @@ public class BotSelectWeightHandler : IBotActionHandler
         int.TryParse(parts[0], out var weight);
         Guid.TryParse(parts[1], out var keywordId);
 
-        var draftProcess = await _draftService.GetDraftProcessAsync(action.UserId);
+        var draftProcess = await _processManager.GetDraftProcessAsync(action.UserId);
 
         if (draftProcess is null)
             throw new InvalidOperationException("Draft process not found.");
