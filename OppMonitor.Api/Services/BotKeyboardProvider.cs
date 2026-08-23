@@ -92,6 +92,7 @@ public class BotKeyboardProvider
         {
             if (process.ProcessStatus == ProcessStatus.Draft)
                 continue;
+
             buttons.Add(
             [
                 InlineKeyboardButton.WithCallbackData(
@@ -172,9 +173,11 @@ public class BotKeyboardProvider
         };
     }
 
-    public InlineKeyboardMarkup GetProcessManagementKeyboard(ProcessStatus status)
+    public InlineKeyboardMarkup GetProcessManagementKeyboard(Process process)
     {
         var buttons = new List<IEnumerable<InlineKeyboardButton>>();
+        var status = process.ProcessStatus;
+        var processId = process.Id;
 
         if (status == ProcessStatus.Completed)
         {
@@ -182,7 +185,7 @@ public class BotKeyboardProvider
             [
                 InlineKeyboardButton.WithCallbackData(
                 "👀 مشاهده سرنخ‌ها",
-                "view_leads")
+                $"show_leads:{processId}:0")
             ]);
         }
 
@@ -243,6 +246,51 @@ public class BotKeyboardProvider
                         "start")
                 ]
             ]
+        };
+    }
+
+    public InlineKeyboardMarkup GetLeadNavigationKeyboard(
+        Guid processId,
+        int page,
+        int totalLeads)
+    {
+        var buttons = new List<IEnumerable<InlineKeyboardButton>>();
+
+        var navigationButtons = new List<InlineKeyboardButton>();
+
+        if (page > 0)
+        {
+            navigationButtons.Add(
+                InlineKeyboardButton.WithCallbackData(
+                    "⬅️ قبلی",
+                    $"show_leads:{processId}:{page - 1}"
+                )
+            );
+        }
+
+        if (page < totalLeads - 1)
+        {
+            navigationButtons.Add(
+                InlineKeyboardButton.WithCallbackData(
+                    "بعدی ➡️",
+                    $"show_leads:{processId}:{page + 1}"
+                )
+            );
+        }
+
+        if (navigationButtons.Count > 0)
+            buttons.Add(navigationButtons);
+
+        buttons.Add(
+        [
+            InlineKeyboardButton.WithCallbackData(
+            "🔙 مدیریت جستجو",
+            $"manage_search:{processId}")
+        ]);
+
+        return new InlineKeyboardMarkup
+        {
+            InlineKeyboard = buttons
         };
     }
 }

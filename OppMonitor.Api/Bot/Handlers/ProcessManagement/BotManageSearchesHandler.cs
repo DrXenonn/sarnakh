@@ -64,7 +64,7 @@ public class BotManageSearchesHandler : IBotActionHandler
             messageId: action.MessageId!.Value,
             text: text,
             replyMarkup: _keyboardProvider
-                .GetProcessManagementKeyboard(process.ProcessStatus)
+                .GetProcessManagementKeyboard(process)
         );
     }
 }
