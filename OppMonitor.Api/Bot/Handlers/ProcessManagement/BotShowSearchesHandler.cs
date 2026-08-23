@@ -1,4 +1,3 @@
-using OppMonitor.Api.Data;
 using OppMonitor.Api.Services;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -14,7 +13,6 @@ public class BotShowSearchesHandler : IBotActionHandler
 
     public BotShowSearchesHandler(
         TelegramBotClient bot,
-        AppDbContext dbContext,
         BotKeyboardProvider keyboardProvider)
     {
         _bot = bot;
@@ -23,11 +21,25 @@ public class BotShowSearchesHandler : IBotActionHandler
 
     public async Task<Message> HandleAsync(BotAction action)
     {
-        return await _bot.SendMessage(
-            action.ChatId,
-            $"Your processes:",
-            replyMarkup: await _keyboardProvider.GetProcessesKeyboard(action.UserId)
-        );
+        var keyboard = await _keyboardProvider
+            .GetProcessesKeyboard(action.UserId);
 
+        const string text = "📋 جستجوهای شما:";
+
+        if (action.MessageId is not null)
+        {
+            return await _bot.EditMessageText(
+                chatId: action.ChatId,
+                messageId: action.MessageId.Value,
+                text: text,
+                replyMarkup: keyboard
+            );
+        }
+
+        return await _bot.SendMessage(
+            chatId: action.ChatId,
+            text: text,
+            replyMarkup: keyboard
+        );
     }
 }

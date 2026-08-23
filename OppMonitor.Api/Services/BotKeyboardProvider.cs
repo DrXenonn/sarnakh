@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using OppMonitor.Api.Data;
+using OppMonitor.Api.Models;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace OppMonitor.Api.Services;
@@ -93,7 +94,7 @@ public class BotKeyboardProvider
             [
                 InlineKeyboardButton.WithCallbackData(
                 $"{process.Name} ({_processManager.GetStatusText(process.ProcessStatus)})",
-                $"manage_process:{process.Id}")
+                $"manage_search:{process.Id}")
             ]);
         }
 
@@ -166,6 +167,60 @@ public class BotKeyboardProvider
                         $"keyword_weight:5:{keywordId}")
                 ]
             ]
+        };
+    }
+
+    public InlineKeyboardMarkup GetProcessManagementKeyboard(ProcessStatus status)
+    {
+        var buttons = new List<IEnumerable<InlineKeyboardButton>>();
+
+        if (status == ProcessStatus.Completed)
+        {
+            buttons.Add(
+            [
+                InlineKeyboardButton.WithCallbackData(
+                "👀 مشاهده سرنخ‌ها",
+                "view_leads")
+            ]);
+        }
+
+        if (status == ProcessStatus.Running)
+        {
+            buttons.Add(
+            [
+                InlineKeyboardButton.WithCallbackData(
+                "⏹️ توقف جستجو",
+                "stop_process")
+            ]);
+        }
+
+        if (status is ProcessStatus.Completed or ProcessStatus.Stopped or ProcessStatus.Failed)
+        {
+            buttons.Add(
+            [
+                InlineKeyboardButton.WithCallbackData(
+                "🔄 اجرای مجدد",
+                "rerun_process")
+            ]);
+        }
+
+        buttons.Add(
+        [
+            InlineKeyboardButton.WithCallbackData(
+            "🗑️ حذف جستجو",
+            "delete_process")
+        ]);
+
+        buttons.Add(
+        [
+            InlineKeyboardButton.WithCallbackData(
+            "⬅️ بازگشت به جستجوهای من",
+            "show_searches")
+        ]);
+
+        return new InlineKeyboardMarkup
+        {
+            InlineKeyboard = buttons
         };
     }
 
