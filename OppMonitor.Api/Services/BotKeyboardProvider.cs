@@ -90,6 +90,8 @@ public class BotKeyboardProvider
 
         foreach (var process in processes)
         {
+            if (process.ProcessStatus == ProcessStatus.Draft)
+                continue;
             buttons.Add(
             [
                 InlineKeyboardButton.WithCallbackData(
