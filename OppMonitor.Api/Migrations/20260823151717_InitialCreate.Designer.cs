@@ -14,7 +14,7 @@ using OppMonitor.Api.Data;
 namespace OppMonitor.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260819005841_InitialCreate")]
+    [Migration("20260823151717_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -23,7 +23,7 @@ namespace OppMonitor.Api.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("identity")
-                .HasAnnotation("ProductVersion", "10.0.10")
+                .HasAnnotation("ProductVersion", "10.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -313,8 +313,8 @@ namespace OppMonitor.Api.Migrations
                     b.Property<long?>("SenderId")
                         .HasColumnType("bigint");
 
-                    b.Property<long>("TelegramMessageId")
-                        .HasColumnType("bigint");
+                    b.Property<int>("TelegramMessageId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Text")
                         .IsRequired()

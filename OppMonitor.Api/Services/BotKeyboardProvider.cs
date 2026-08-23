@@ -252,7 +252,9 @@ public class BotKeyboardProvider
     public InlineKeyboardMarkup GetLeadNavigationKeyboard(
         Guid processId,
         int page,
-        int totalLeads)
+        int totalLeads,
+        long chatId,
+        int messageId)
     {
         var buttons = new List<IEnumerable<InlineKeyboardButton>>();
 
@@ -283,14 +285,35 @@ public class BotKeyboardProvider
 
         buttons.Add(
         [
+            InlineKeyboardButton.WithUrl(
+            "🔗 مشاهده پیام",
+            BuildTelegramMessageLink(chatId, messageId)
+        )
+        ]);
+
+        buttons.Add(
+        [
             InlineKeyboardButton.WithCallbackData(
             "🔙 مدیریت جستجو",
-            $"manage_search:{processId}")
+            $"manage_search:{processId}"
+        )
         ]);
 
         return new InlineKeyboardMarkup
         {
             InlineKeyboard = buttons
         };
+    }
+
+    private static string BuildTelegramMessageLink(
+        long chatId,
+        long messageId)
+    {
+        var chatIdString = chatId.ToString();
+
+        if (chatIdString.StartsWith("-100"))
+            chatIdString = chatIdString[4..];
+
+        return $"https://t.me/c/{chatIdString}/{messageId}";
     }
 }

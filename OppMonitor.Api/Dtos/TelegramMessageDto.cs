@@ -9,5 +9,5 @@ public record TelegramMessageDto
  string Text,
  long GroupId,
  string GroupName
- )
+)
 { }

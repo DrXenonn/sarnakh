@@ -100,8 +100,9 @@ public class BotShowLeadsHandler : IBotActionHandler
             replyMarkup: _keyboardProvider.GetLeadNavigationKeyboard(
                 processId,
                 index,
-                totalLeads
-            )
+                totalLeads,
+                lead.GroupId,
+                lead.TelegramMessageId)
         );
     }
 

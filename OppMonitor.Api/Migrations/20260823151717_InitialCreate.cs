@@ -95,7 +95,7 @@ namespace OppMonitor.Api.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    TelegramMessageId = table.Column<long>(type: "bigint", nullable: false),
+                    TelegramMessageId = table.Column<int>(type: "integer", nullable: false),
                     SenderId = table.Column<long>(type: "bigint", nullable: true),
                     Username = table.Column<string>(type: "text", nullable: true),
                     Text = table.Column<string>(type: "text", nullable: false),

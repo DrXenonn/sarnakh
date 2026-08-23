@@ -6,7 +6,7 @@ namespace OppMonitor.Api.Pipeline;
 public class TelegramMessageContext
 {
     // Raw input (set once at creation)
-    public long MessageId { get; init; }
+    public int MessageId { get; init; }
     public string Text { get; init; } = string.Empty;
     public string? Username { get; init; }
     public long? SenderId { get; init; }
