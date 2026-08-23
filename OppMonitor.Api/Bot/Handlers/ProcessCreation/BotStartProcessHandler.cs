@@ -12,19 +12,22 @@ public class BotStartProcessHandler : IBotActionHandler
     private readonly BotKeyboardProvider _keyboardProvider;
     private readonly ProcessManager _processManager;
     private readonly RedisCommandQueueService _redisCommandQueueService;
+    private readonly BotActionHandlerService _actionHandler;
 
     public BotStartProcessHandler(
         TelegramBotClient bot,
         AppDbContext dbContext,
         BotKeyboardProvider keyboardProvider,
         ProcessManager draftService,
-        RedisCommandQueueService commandQueueService)
+        RedisCommandQueueService commandQueueService,
+        BotActionHandlerService actionHandler)
     {
         _bot = bot;
         _dbContext = dbContext;
         _keyboardProvider = keyboardProvider;
         _processManager = draftService;
         _redisCommandQueueService = commandQueueService;
+        _actionHandler = actionHandler;
     }
 
     public string Action => "start_process";
@@ -43,10 +46,14 @@ public class BotStartProcessHandler : IBotActionHandler
                     draftProcess.Config.SearchDays);
         draftProcess.ProcessStatus = Models.ProcessStatus.Pending;
 
+        await _dbContext.SaveChangesAsync();
 
-        return await _bot.SendMessage(
-            action.ChatId,
-            $"Process started"
-        );
+        return await _actionHandler.HandleAction(new BotAction(
+                    action.UserId,
+                    "show_searches",
+                    null,
+                    action.ChatId,
+                    action.MessageId
+                    ));
     }
 }
