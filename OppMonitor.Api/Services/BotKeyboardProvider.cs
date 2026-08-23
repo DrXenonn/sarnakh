@@ -101,6 +101,16 @@ public class BotKeyboardProvider
             ]);
         }
 
+        buttons.Add(
+        [
+            InlineKeyboardButton.WithCallbackData(
+            "⬅️ بازگشت به منوی اصلی",
+            "start"),
+            InlineKeyboardButton.WithCallbackData(
+                "🔄 بروزرسانی",
+                "show_searches")
+        ]);
+
         return new InlineKeyboardMarkup
         {
             InlineKeyboard = buttons
