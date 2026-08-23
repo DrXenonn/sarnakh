@@ -63,7 +63,7 @@ public class ProcessManager
         return status switch
         {
             ProcessStatus.Draft => "📝 پیش‌نویس",
-            ProcessStatus.Running => "🟢 در حال اجرا",
+            ProcessStatus.Running => "📡 در حال بررسی",
             ProcessStatus.Stopped => "⏹️ متوقف شده",
             ProcessStatus.Completed => "✅ تکمیل شده",
             ProcessStatus.Failed => "❌ ناموفق",
