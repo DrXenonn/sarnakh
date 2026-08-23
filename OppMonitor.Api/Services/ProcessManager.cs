@@ -67,6 +67,7 @@ public class ProcessManager
             ProcessStatus.Stopped => "⏹️ متوقف شده",
             ProcessStatus.Completed => "✅ تکمیل شده",
             ProcessStatus.Failed => "❌ ناموفق",
+            ProcessStatus.Pending => "⏳ در صف اجرا",
             _ => "❓ نامشخص"
         };
     }

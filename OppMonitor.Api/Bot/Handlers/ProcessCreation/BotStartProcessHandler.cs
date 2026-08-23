@@ -1,4 +1,5 @@
 using OppMonitor.Api.Data;
+using OppMonitor.Api.Models;
 using OppMonitor.Api.Services;
 using Telegram.Bot;
 using Telegram.Bot.Types;
@@ -39,12 +40,13 @@ public class BotStartProcessHandler : IBotActionHandler
         if (draftProcess is null)
             throw new InvalidOperationException("Draft process not found.");
 
+        draftProcess.ProcessStatus = ProcessStatus.Pending;
+
         await _redisCommandQueueService
             .QueueScanHistoricalAsync(
                     draftProcess.Id,
                     draftProcess.Config.TelegramChatIds,
                     draftProcess.Config.SearchDays);
-        draftProcess.ProcessStatus = Models.ProcessStatus.Pending;
 
         await _dbContext.SaveChangesAsync();
 
