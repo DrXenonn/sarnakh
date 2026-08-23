@@ -40,6 +40,7 @@ public class OperatorBotJob : BackgroundService
 
         var parts = callback.Data.Split(':', 2);
 
+        _bot.AnswerCallbackQuery(callback.Id);
         return _actionHandler.HandleAction(new BotAction(
             callback.From.Id,
             parts[0],
