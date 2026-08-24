@@ -34,7 +34,7 @@ public class BotDeleteSearchHandler : IBotActionHandler
                     "show_searches",
                     null,
                     action.ChatId,
-                    null
+                    action.MessageId
                     ));
     }
 }

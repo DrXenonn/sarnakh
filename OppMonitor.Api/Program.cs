@@ -145,7 +145,6 @@ try
     builder.Services.AddScoped<IBotActionHandler, BotShowLeadsHandler>();
     builder.Services.AddScoped<IBotActionHandler, BotDeleteSearchHandler>();
     builder.Services.AddScoped<IBotActionHandler, BotRerunSearchHandler>();
-    builder.Services.AddScoped<IBotActionHandler, BotStopSearchHandler>();
     builder.Services.AddScoped<BotMessageHandler>();
     builder.Services.AddScoped<RedisCommandQueueService>();
     builder.Services.AddHostedService<OperatorBotJob>();
