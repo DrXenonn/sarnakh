@@ -217,14 +217,13 @@ public class BotKeyboardProvider
                 "🔄 اجرای مجدد",
                 "rerun_process")
             ]);
+            buttons.Add(
+                    [
+                    InlineKeyboardButton.WithCallbackData(
+                        "🗑️ حذف جستجو",
+                        $"delete_search:{processId}")
+                    ]);
         }
-
-        buttons.Add(
-        [
-            InlineKeyboardButton.WithCallbackData(
-            "🗑️ حذف جستجو",
-            "delete_process")
-        ]);
 
         buttons.Add(
         [

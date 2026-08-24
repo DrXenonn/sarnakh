@@ -322,6 +322,8 @@ namespace OppMonitor.Api.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ProcessId");
+
                     b.ToTable("Leads", "public");
                 });
 
@@ -486,12 +488,21 @@ namespace OppMonitor.Api.Migrations
                     b.Navigation("KeywordPack");
                 });
 
+            modelBuilder.Entity("OppMonitor.Api.Models.Lead", b =>
+                {
+                    b.HasOne("OppMonitor.Api.Models.Process", null)
+                        .WithMany()
+                        .HasForeignKey("ProcessId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("OppMonitor.Api.Models.Process", b =>
                 {
                     b.HasOne("OppMonitor.Api.Models.Config", "Config")
                         .WithMany()
                         .HasForeignKey("ConfigId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Config");

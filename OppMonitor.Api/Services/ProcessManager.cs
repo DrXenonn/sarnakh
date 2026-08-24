@@ -41,6 +41,20 @@ public class ProcessManager
                 p.ProcessStatus == ProcessStatus.Draft);
     }
 
+    public async Task DeleteProcessAsync(Guid processId, long userId)
+    {
+        var process = await _dbContext.Processes
+           .FirstOrDefaultAsync(p =>
+               p.Id == processId &&
+               p.TelegramUserId == userId);
+
+        if (process is not null)
+        {
+            _dbContext.Processes.Remove(process);
+            await _dbContext.SaveChangesAsync();
+        }
+    }
+
     public async Task UpdateStatus(Process process, string? statusJson)
     {
         var newStatus = statusJson switch

@@ -90,27 +90,6 @@ namespace OppMonitor.Api.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Leads",
-                schema: "public",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    TelegramMessageId = table.Column<int>(type: "integer", nullable: false),
-                    SenderId = table.Column<long>(type: "bigint", nullable: true),
-                    Username = table.Column<string>(type: "text", nullable: true),
-                    Text = table.Column<string>(type: "text", nullable: false),
-                    Score = table.Column<int>(type: "integer", nullable: false),
-                    MessageDate = table.Column<Instant>(type: "timestamp with time zone", nullable: false),
-                    GroupName = table.Column<string>(type: "text", nullable: false),
-                    GroupId = table.Column<long>(type: "bigint", nullable: false),
-                    ProcessId = table.Column<Guid>(type: "uuid", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Leads", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "TelegramGroupCategories",
                 schema: "public",
                 columns: table => new
@@ -298,7 +277,7 @@ namespace OppMonitor.Api.Migrations
                         principalSchema: "public",
                         principalTable: "Configs",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -328,6 +307,34 @@ namespace OppMonitor.Api.Migrations
                         principalSchema: "public",
                         principalTable: "KeywordPacks",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Leads",
+                schema: "public",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    TelegramMessageId = table.Column<int>(type: "integer", nullable: false),
+                    SenderId = table.Column<long>(type: "bigint", nullable: true),
+                    Username = table.Column<string>(type: "text", nullable: true),
+                    Text = table.Column<string>(type: "text", nullable: false),
+                    Score = table.Column<int>(type: "integer", nullable: false),
+                    MessageDate = table.Column<Instant>(type: "timestamp with time zone", nullable: false),
+                    GroupName = table.Column<string>(type: "text", nullable: false),
+                    GroupId = table.Column<long>(type: "bigint", nullable: false),
+                    ProcessId = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Leads", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Leads_Processes_ProcessId",
+                        column: x => x.ProcessId,
+                        principalSchema: "public",
+                        principalTable: "Processes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
@@ -387,6 +394,12 @@ namespace OppMonitor.Api.Migrations
                 column: "KeywordPackId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Leads_ProcessId",
+                schema: "public",
+                table: "Leads",
+                column: "ProcessId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Processes_ConfigId",
                 schema: "public",
                 table: "Processes",
@@ -431,10 +444,6 @@ namespace OppMonitor.Api.Migrations
                 schema: "public");
 
             migrationBuilder.DropTable(
-                name: "Processes",
-                schema: "public");
-
-            migrationBuilder.DropTable(
                 name: "RefreshTokens",
                 schema: "identity");
 
@@ -455,12 +464,16 @@ namespace OppMonitor.Api.Migrations
                 schema: "public");
 
             migrationBuilder.DropTable(
-                name: "Configs",
+                name: "Processes",
                 schema: "public");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers",
                 schema: "identity");
+
+            migrationBuilder.DropTable(
+                name: "Configs",
+                schema: "public");
         }
     }
 }

@@ -25,7 +25,19 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
             .HasOne(p => p.Config)
             .WithMany()
             .HasForeignKey(p => p.ConfigId)
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<Lead>()
+            .HasOne<Process>()
+            .WithMany()
+            .HasForeignKey(l => l.ProcessId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        builder.Entity<Keyword>()
+            .HasOne(k => k.Config)
+            .WithMany(c => c.Keywords)
+            .HasForeignKey(k => k.ConfigId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.Entity<Keyword>()
             .HasOne(k => k.Config)
