@@ -199,15 +199,15 @@ public class BotKeyboardProvider
             ]);
         }
 
-        if (status == ProcessStatus.Running)
-        {
-            buttons.Add(
-            [
-                InlineKeyboardButton.WithCallbackData(
-                "⏹️ توقف جستجو",
-                $"stop_search:{processId}")
-            ]);
-        }
+        // if (status == ProcessStatus.Running)
+        // {
+        //     buttons.Add(
+        //     [
+        //         InlineKeyboardButton.WithCallbackData(
+        //         "⏹️ توقف جستجو",
+        //         $"stop_search:{processId}")
+        //     ]);
+        // }
 
         if (status is ProcessStatus.Completed or ProcessStatus.Stopped or ProcessStatus.Failed)
         {
