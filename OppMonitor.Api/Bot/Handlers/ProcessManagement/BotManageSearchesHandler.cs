@@ -56,8 +56,7 @@ public class BotManageSearchesHandler : IBotActionHandler
             $"   • {config.Keywords.Count} کلمه کلیدی\n" +
             $"   • {config.TelegramChatIds.Count} گروه\n" +
             $"   • حداقل امتیاز: {config.ScoreThreshold}\n" +
-            $"   • بازه جستجو: {config.SearchDays} روز گذشته\n\n" +
-            "چه کاری می‌خواهید انجام دهید؟";
+            $"   • بازه جستجو: {config.SearchDays} روز گذشته\n\n";
 
         return await _bot.EditMessageText(
             chatId: action.ChatId,
