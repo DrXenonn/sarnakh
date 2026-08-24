@@ -215,7 +215,7 @@ public class BotKeyboardProvider
             [
                 InlineKeyboardButton.WithCallbackData(
                 "🔄 اجرای مجدد",
-                "rerun_process")
+                $"rerun_search:{processId}")
             ]);
             buttons.Add(
                     [
