@@ -32,4 +32,20 @@ public class RedisCommandQueueService
             JsonSerializer.Serialize(command)
         );
     }
+
+    public async Task QueueStopScanAsync(Guid processId)
+    {
+        var command = new
+        {
+            action = "stop_scan",
+            process_id = processId.ToString()
+        };
+
+        var db = _redis.GetDatabase();
+
+        await db.ListRightPushAsync(
+            "telegram_commands",
+            JsonSerializer.Serialize(command)
+        );
+    }
 }

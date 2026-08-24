@@ -205,7 +205,7 @@ public class BotKeyboardProvider
             [
                 InlineKeyboardButton.WithCallbackData(
                 "⏹️ توقف جستجو",
-                "stop_process")
+                $"stop_search:{processId}")
             ]);
         }
 
