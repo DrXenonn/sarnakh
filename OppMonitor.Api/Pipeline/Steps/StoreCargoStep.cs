@@ -29,7 +29,6 @@ public class StoreCargoStep : IPipelineStep
 
         lead.ProcessId = ctx.Process.Id;
         _dbContext.Leads.Add(lead);
-        ctx.Process.ProcessStatus = ProcessStatus.Completed;
 
         await _dbContext.SaveChangesAsync(ct);
         return ctx;
