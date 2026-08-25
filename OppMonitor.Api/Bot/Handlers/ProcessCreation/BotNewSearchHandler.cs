@@ -56,7 +56,9 @@ public class BotNewSearchHandler : IBotActionHandler
 
         const string text =
             "🔎 جستجوی جدید\n\n" +
-            "لطفاً یک نام برای جستجوی خود وارد کنید:";
+            "یک نام برای این جستجو انتخاب کنید.\n" +
+            "این نام بعداً برای شناسایی جستجو در فهرست جستجوهای شما نمایش داده می‌شود.\n\n" +
+            "✏️ نام موردنظر را همین‌جا در چت ارسال کنید:";
 
         if (action.MessageId is not null)
         {
