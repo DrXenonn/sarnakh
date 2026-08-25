@@ -28,8 +28,9 @@ public class BotShowGroupCategoriesHandler : IBotActionHandler
         var keyboard = await _keyboardProvider.GetGroupCategoriesKeyboard();
 
         const string text =
-            "🔎 جستجوی جدید\n\n" +
-            "دسته‌بندی موردنظر خود را انتخاب کنید:";
+            "👥 انتخاب حوزه جستجو\n\n" +
+            "گروه‌های تلگرامی مرتبط در حوزه‌های مختلف توسط تیم سرنخ شناسایی و دسته‌بندی شده‌اند.\n\n" +
+            "حوزه موردنظر خود را انتخاب کنید:";
 
         if (action.MessageId is not null)
         {

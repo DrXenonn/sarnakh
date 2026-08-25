@@ -2,12 +2,12 @@ INSERT INTO public."TelegramGroupCategories" ("Id", "Name", "GroupIds")
 VALUES
 (
     gen_random_uuid(),
-    'زیبایی و مراقبت',
+    '💄 زیبایی و مراقبت',
     ARRAY[-1001239442326::bigint]
 ),
 (
     gen_random_uuid(),
-    'ورزش و بدنسازی',
+    '🏋️ ورزش و بدنسازی',
     ARRAY[
         -1001285978456::bigint,
         -1003330885295::bigint
