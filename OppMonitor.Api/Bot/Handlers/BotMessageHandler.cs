@@ -106,7 +106,7 @@ public class BotMessageHandler
 
         await _bot.SendMessage(
             chatId: message.Chat.Id,
-            text: $"کلمه «{keyword}» چه وزنی داشته باشد؟",
+            text: $"🔑 اهمیت کلمه «{keyword}» را انتخاب کنید:",
             replyMarkup: keyboard
         );
     }

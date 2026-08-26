@@ -50,8 +50,11 @@ public class BotSelectGroupCategoriesHandler : IBotActionHandler
             replyMarkup: await _keyboardProvider.GetKeywordPacksKeyboard(),
             messageId: action.MessageId!.Value,
             text:
-                "🔑 لطفاً اولین کلمه کلیدی خود را وارد کنید.\n\n" +
-                "مثال: ضد آفتاب"
-        );
+            "🔑 کلمات کلیدی\n\n" +
+            "کلمات کلیدی مشخص می‌کنند سرنخ به دنبال چه کلمه یا عبارتی در گفتگوها بگردد.\n\n" +
+            "📦 می‌توانید یکی از بسته‌های آماده زیر را انتخاب کنید؛ " +
+            "این بسته‌ها شامل کلمات کلیدی مرتبط و از پیش تنظیم‌شده هستند.\n\n" +
+            "✏️ یا یک کلمه کلیدی دلخواه را همین‌جا در چت ارسال کنید.\n\n" +
+            "مثال: ضد آفتاب");
     }
 }

@@ -159,26 +159,18 @@ public class BotKeyboardProvider
             InlineKeyboard =
             [
                 [
-                    InlineKeyboardButton.WithCallbackData(
-                        "1",
-                        $"keyword_weight:1:{keywordId}"),
+                InlineKeyboardButton.WithCallbackData(
+                    "🟢 کم",
+                    $"keyword_weight:1:{keywordId}"),
 
-                    InlineKeyboardButton.WithCallbackData(
-                        "2",
-                        $"keyword_weight:2:{keywordId}"),
+                InlineKeyboardButton.WithCallbackData(
+                    "🟡 متوسط",
+                    $"keyword_weight:2:{keywordId}"),
 
-                    InlineKeyboardButton.WithCallbackData(
-                        "3",
-                        $"keyword_weight:3:{keywordId}"),
-
-                    InlineKeyboardButton.WithCallbackData(
-                        "4",
-                        $"keyword_weight:4:{keywordId}"),
-
-                    InlineKeyboardButton.WithCallbackData(
-                        "5",
-                        $"keyword_weight:5:{keywordId}")
-                ]
+                InlineKeyboardButton.WithCallbackData(
+                    "🔴 زیاد",
+                    $"keyword_weight:3:{keywordId}")
+            ]
             ]
         };
     }

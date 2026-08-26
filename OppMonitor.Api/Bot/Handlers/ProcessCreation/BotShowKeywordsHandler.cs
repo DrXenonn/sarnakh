@@ -37,7 +37,8 @@ public class BotShowKeywordsHandler : IBotActionHandler
 
         var keywordList = string.Join(
             "\n",
-            keywords.Select(k => $"🔹 {k.Text} — وزن {k.Weight}")
+            keywords.Select(k =>
+                $"🔹 {k.Text} — {GetImportanceText(k.Weight)}")
         );
 
         return await _bot.EditMessageText(
@@ -50,5 +51,16 @@ public class BotShowKeywordsHandler : IBotActionHandler
                 "➕ برای افزودن کلمه بعدی، آن را ارسال کنید.",
             replyMarkup: await _keyboardProvider.GetKeywordSelectionKeyboard()
         );
+    }
+
+    private static string GetImportanceText(int? importance)
+    {
+        return importance switch
+        {
+            1 => "🟢 کم",
+            2 => "🟡 متوسط",
+            3 => "🔴 زیاد",
+            _ => "⚪ نامشخص"
+        };
     }
 }
