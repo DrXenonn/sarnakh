@@ -24,7 +24,7 @@ logs/
 # Environment / secrets (nested)
 appsettings.Development.json
 appsettings.Local.json
-telegram-playground/.env
+telegram-worker/.env
 
 # Editor
 .vs/
