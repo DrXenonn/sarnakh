@@ -34,6 +34,8 @@ public class BotMainmenuHandler : IBotActionHandler
             .Select(p => p.Id);
 
         var searches = await _processManager.GetProcessesForTelegramUserAsync(action.UserId);
+        var nonDraftSearches = searches.Where(p => p.ProcessStatus != Models.ProcessStatus.Draft)
+            .ToList();
 
         var leadsCount = await _dbContext.Leads
             .CountAsync(l => userProcessIds.Contains(l.ProcessId));
@@ -51,7 +53,7 @@ public class BotMainmenuHandler : IBotActionHandler
         var text =
             "🔎 <b>سرنخ</b>\n\n" +
             "سرنخ‌های جدید را از گفتگوهای مرتبط در تلگرام پیدا کنید.\n\n" +
-            $"📂 <b>جستجوهای شما:</b> {searches.Count}\n" +
+            $"📂 <b>جستجوهای شما:</b> {nonDraftSearches.Count}\n" +
             $"🎯 <b>سرنخ‌های پیدا شده:</b> {leadsCount}\n\n" +
             "چه کاری می‌خواهید انجام دهید؟";
 
