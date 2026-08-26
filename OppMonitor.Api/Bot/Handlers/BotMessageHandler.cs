@@ -89,6 +89,16 @@ public class BotMessageHandler
         var keyword = message.Text!;
         var id = Guid.NewGuid();
 
+        var potentialDup = await _dbContext.Keywords
+            .FirstOrDefaultAsync(k =>
+                k.ConfigId == draftProcess.Config!.Id &&
+                k.Text == keyword);
+
+        if (potentialDup is not null)
+        {
+            _dbContext.Keywords.Remove(potentialDup);
+        }
+
         var newKeyword = new Keyword
         {
             Id = id,

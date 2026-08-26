@@ -14,7 +14,7 @@ using OppMonitor.Api.Data;
 namespace OppMonitor.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260826001341_InitialCreate")]
+    [Migration("20260826001702_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
