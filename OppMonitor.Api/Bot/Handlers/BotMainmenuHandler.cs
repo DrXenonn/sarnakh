@@ -11,15 +11,18 @@ public class BotMainmenuHandler : IBotActionHandler
     private readonly TelegramBotClient _bot;
     private readonly BotKeyboardProvider _keyboardProvider;
     private readonly AppDbContext _dbContext;
+    private readonly ProcessManager _processManager;
 
     public BotMainmenuHandler(
         TelegramBotClient bot,
         BotKeyboardProvider keyboardProvider,
-        AppDbContext dbContext)
+        AppDbContext dbContext,
+        ProcessManager processManager)
     {
         _bot = bot;
         _keyboardProvider = keyboardProvider;
         _dbContext = dbContext;
+        _processManager = processManager;
     }
 
     public string Action => "start";
@@ -30,18 +33,25 @@ public class BotMainmenuHandler : IBotActionHandler
             .Where(p => p.TelegramUserId == action.UserId)
             .Select(p => p.Id);
 
-        var searchCount = await userProcessIds
-            .CountAsync();
+        var searches = await _processManager.GetProcessesForTelegramUserAsync(action.UserId);
 
         var leadsCount = await _dbContext.Leads
             .CountAsync(l => userProcessIds.Contains(l.ProcessId));
+
+        var draftProcess = await _processManager.GetDraftProcessAsync(action.UserId);
+
+        if (draftProcess is not null)
+        {
+            draftProcess.ProcessInputState = Models.ProcessInputState.None;
+            await _dbContext.SaveChangesAsync();
+        }
 
         var keyboard = _keyboardProvider.GetMainMenuKeyboard();
 
         var text =
             "🔎 <b>سرنخ</b>\n\n" +
             "سرنخ‌های جدید را از گفتگوهای مرتبط در تلگرام پیدا کنید.\n\n" +
-            $"📂 <b>جستجوهای شما:</b> {searchCount}\n" +
+            $"📂 <b>جستجوهای شما:</b> {searches.Count}\n" +
             $"🎯 <b>سرنخ‌های پیدا شده:</b> {leadsCount}\n\n" +
             "چه کاری می‌خواهید انجام دهید؟";
 

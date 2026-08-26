@@ -73,9 +73,14 @@ public class BotKeyboardProvider
             [
                 InlineKeyboardButton.WithCallbackData(
                     $"{groupCategory.Name} ({groupCategory.GroupIds.Count} گروه)",
-                    $"select_groups:{groupCategory.Id}")
+                    $"select_groups:{groupCategory.Id}"),
             ]);
         }
+
+        buttons.Add([
+                InlineKeyboardButton.WithCallbackData(
+                "⬅️ بازگشت به منوی اصلی",
+                "start")]);
 
         return new InlineKeyboardMarkup
         {
