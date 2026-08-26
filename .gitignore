@@ -1,14 +1,18 @@
 # Python
 .venv/
+venv/
 __pycache__/
+*.py[cod]
 
 # Secrets & sessions
 .env
+**/.env
 *.session
+*.session-journal
 
-# .NET
-bin/
-obj/
+# .NET build artifacts
+**/bin/
+**/obj/
 *.user
 *.suo
 
@@ -21,20 +25,20 @@ obj/
 logs/
 *.log
 
-# Environment / secrets (nested)
+# Local configuration
 appsettings.Development.json
 appsettings.Local.json
-telegram-worker/.env
 
-# Editor
+# Editor / AI tools
 .vs/
 .vscode/
 .idea/
+.claude/
 *.swp
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Publish
+# Publish output
 publish/
