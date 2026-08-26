@@ -58,6 +58,8 @@ public class BotSelectKeywordPack : IBotActionHandler
                 });
             }
 
+        draftProcess.Config.KeywordPackIds.Add(keywordPackId);
+
         await _dbContext.SaveChangesAsync();
 
         return await _botActionHandler.HandleAction(

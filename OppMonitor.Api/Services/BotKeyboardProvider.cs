@@ -16,9 +16,10 @@ public class BotKeyboardProvider
         _processManager = processManager;
     }
 
-    public async Task<InlineKeyboardMarkup> GetKeywordPacksKeyboard()
+    public async Task<InlineKeyboardMarkup> GetKeywordPacksKeyboard(Process process)
     {
         var keywordPacks = await _dbContext.KeywordPacks
+            .Where(k => !process.Config.KeywordPackIds.Contains(k.Id))
             .Include(k => k.Keywords)
             .ToListAsync();
 
@@ -40,9 +41,9 @@ public class BotKeyboardProvider
         };
     }
 
-    public async Task<InlineKeyboardMarkup> GetKeywordSelectionKeyboard()
+    public async Task<InlineKeyboardMarkup> GetKeywordSelectionKeyboard(Process process)
     {
-        var keywordPacksKeyboard = await GetKeywordPacksKeyboard();
+        var keywordPacksKeyboard = await GetKeywordPacksKeyboard(process);
 
         var buttons = keywordPacksKeyboard.InlineKeyboard.ToList();
 

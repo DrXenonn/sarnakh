@@ -49,7 +49,7 @@ public class BotShowKeywordsHandler : IBotActionHandler
                 keywordList +
                 "\n\n" +
                 "➕ برای افزودن کلمه بعدی، آن را ارسال کنید.",
-            replyMarkup: await _keyboardProvider.GetKeywordSelectionKeyboard()
+            replyMarkup: await _keyboardProvider.GetKeywordSelectionKeyboard(draftProcess)
         );
     }
 

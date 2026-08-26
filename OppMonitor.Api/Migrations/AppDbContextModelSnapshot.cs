@@ -227,6 +227,10 @@ namespace OppMonitor.Api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.PrimitiveCollection<List<Guid>>("KeywordPackIds")
+                        .IsRequired()
+                        .HasColumnType("uuid[]");
+
                     b.Property<int>("ScoreThreshold")
                         .HasColumnType("integer");
 

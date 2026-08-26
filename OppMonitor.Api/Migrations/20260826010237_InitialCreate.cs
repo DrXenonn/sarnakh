@@ -67,6 +67,7 @@ namespace OppMonitor.Api.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    KeywordPackIds = table.Column<List<Guid>>(type: "uuid[]", nullable: false),
                     TelegramChatIds = table.Column<List<long>>(type: "bigint[]", nullable: false),
                     SearchDays = table.Column<int>(type: "integer", nullable: false),
                     ScoreThreshold = table.Column<int>(type: "integer", nullable: false)

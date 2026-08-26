@@ -41,13 +41,17 @@ public class BotSelectGroupCategoriesHandler : IBotActionHandler
         {
             draftProcess.Config.TelegramChatIds = category.GroupIds;
             draftProcess.ProcessInputState = ProcessInputState.Keywords;
+
         }
+
+        if (draftProcess is null)
+            throw new InvalidOperationException("Draft process not found.");
 
         await _dbContext.SaveChangesAsync();
 
         return await _bot.EditMessageText(
             chatId: action.ChatId,
-            replyMarkup: await _keyboardProvider.GetKeywordPacksKeyboard(),
+            replyMarkup: await _keyboardProvider.GetKeywordPacksKeyboard(draftProcess),
             messageId: action.MessageId!.Value,
             text:
             "🔑 کلمات کلیدی\n\n" +

@@ -14,7 +14,7 @@ using OppMonitor.Api.Data;
 namespace OppMonitor.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260826001702_InitialCreate")]
+    [Migration("20260826010237_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -229,6 +229,10 @@ namespace OppMonitor.Api.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.PrimitiveCollection<List<Guid>>("KeywordPackIds")
+                        .IsRequired()
+                        .HasColumnType("uuid[]");
 
                     b.Property<int>("ScoreThreshold")
                         .HasColumnType("integer");
