@@ -35,6 +35,12 @@ public class BotKeyboardProvider
             ]);
         }
 
+        buttons.Add([
+            InlineKeyboardButton.WithCallbackData(
+            "⬅️ بازگشت به منوی اصلی",
+            "start")
+        ]);
+
         return new InlineKeyboardMarkup
         {
             InlineKeyboard = buttons
@@ -45,14 +51,16 @@ public class BotKeyboardProvider
     {
         var keywordPacksKeyboard = await GetKeywordPacksKeyboard(process);
 
-        var buttons = keywordPacksKeyboard.InlineKeyboard.ToList();
+        var buttons = keywordPacksKeyboard.InlineKeyboard
+            .Select(row => row.ToList())
+            .ToList();
 
-        buttons.Add(
-        [
+        buttons[^1].Add(
             InlineKeyboardButton.WithCallbackData(
                 "✅ مرحله بعدی (انتخاب حد امتیاز)",
-                "select_score_threshold")
-        ]);
+                "select_score_threshold"
+            )
+        );
 
         return new InlineKeyboardMarkup
         {

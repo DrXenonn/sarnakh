@@ -11,15 +11,18 @@ public class BotSelectSearchDaysHandler : IBotActionHandler
     private readonly TelegramBotClient _bot;
     private readonly AppDbContext _dbContext;
     private readonly ProcessManager _processManager;
+    private readonly BotKeyboardProvider _keyboardProvider;
 
     public BotSelectSearchDaysHandler(
         TelegramBotClient bot,
         AppDbContext dbContext,
-        ProcessManager processManager)
+        ProcessManager processManager,
+        BotKeyboardProvider keyboardProvider)
     {
         _bot = bot;
         _dbContext = dbContext;
         _processManager = processManager;
+        _keyboardProvider = keyboardProvider;
     }
 
     public string Action => "select_search_days";
@@ -41,7 +44,8 @@ public class BotSelectSearchDaysHandler : IBotActionHandler
                 "⏳ چند روز گذشته را بررسی کنیم؟\n\n" +
                 "مثال:\n" +
                 "7 یعنی بررسی ۷ روز اخیر\n" +
-                "30 یعنی بررسی ۳۰ روز اخیر"
+                "30 یعنی بررسی ۳۰ روز اخیر",
+            replyMarkup: _keyboardProvider.GetBackToMainMenuKeyboard()
         );
     }
 }

@@ -46,7 +46,7 @@ public class BotSelectScoreThreshold : IBotActionHandler
                 "🎯 حداقل امتیاز را وارد کنید:\n\n" +
                 "هرچه عدد بالاتر باشد، فقط پیام‌های مرتبط‌تر نمایش داده می‌شوند.\n\n" +
                 "مثال: 10",
-            replyMarkup: null
+            replyMarkup: _keyboardProvider.GetBackToMainMenuKeyboard()
         );
     }
 }
