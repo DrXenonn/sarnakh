@@ -14,46 +14,38 @@ Sarnakh consists of two main components:
 The worker doesn't do any filtering or scoring itself — it's purely responsible for collecting raw messages and handing them off. All the intelligence lives in the API's pipeline, which matches messages against configured keywords, scores them for relevance, and saves the ones worth acting on as leads.
 
 ```text
-┌─────────────────────┐
-│   Telegram Groups    │
-└──────────┬───────────┘
-           │  raw messages
-           ▼
-┌─────────────────────┐
-│   Telegram Worker     │   reads raw messages from Telegram
-│      (Python)         │   groups the messages into batches
-└──────────┬───────────┘
-           │  message batches
-           ▼
-┌─────────────────────┐
-│        Redis           │   passes batches to the API
-└──────────┬───────────┘
-           │
-           ▼
-┌───────────────────────────────────────┐
-│              Sarnakh API                  │
-│                (.NET)                     │
-│                                            │
-│   ┌───────────────────────────────┐    │
-│   │        Message Pipeline           │    │
-│   │                                    │    │
-│   │   Keyword Matching                │    │
-│   │            │                       │    │
-│   │            ▼                       │    │
-│   │   Relevance Scoring                │    │
-│   └───────────────┬───────────────┘    │
-│                   │  relevant messages     │
-│                   ▼                        │
-│           ┌───────────────┐               │
-│           │  PostgreSQL     │  ← leads saved │
-│           └───────────────┘               │
-│                                            │
-│              Telegram Bot                  │
-│         (search management)                │
-└───────────────────────────────────────┘
+            +-------------------+
+            |  Telegram Groups  |
+            +-------------------+
+               |  raw messages
+                      v
+  +---------------------------------------+
+  |        Telegram Worker (Python)       |
+  |  reads messages, groups into batches  |
+  +---------------------------------------+
+              |  message batches
+                      v
+                 +---------+
+                 |  Redis  |
+                 +---------+
+                      |
+                      v
+    +------------------------------------+
+    |         Sarnakh API (.NET)         |
+    |  Pipeline: keyword match -> score  |
+    |             save leads             |
+    +------------------------------------+
+                      |
+                      v
+       +------------------------------+
+       |  PostgreSQL  (leads stored)  |
+       +------------------------------+
 ```
 
-**In short:** worker reads → batches → pipeline filters & scores → leads saved to Postgres.
+- The **worker** does no filtering — it just reads raw messages and batches them.
+- **Redis** carries those batches from the worker to the API.
+- The **API's pipeline** does all the thinking: keyword matching, relevance scoring, and deciding what becomes a lead.
+- Qualifying leads are persisted to **PostgreSQL**, and the **Telegram Bot** (part of the API) is used to manage searches and review results.
 
 ## Features
 
@@ -77,8 +69,6 @@ The worker doesn't do any filtering or scoring itself — it's purely responsibl
 - Entity Framework Core
 - PostgreSQL
 - Redis
-- ASP.NET Core Identity
-- JWT authentication
 - Serilog
 - FluentValidation
 - AutoMapper
