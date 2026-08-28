@@ -29,7 +29,6 @@ public class KeywordMatchStep : IPipelineStep
 
         if (score <= telegramMessageCtx.Process.Config.ScoreThreshold)
         {
-            _logger.LogInformation("Message {MessageId} dropped, score {Score} below threshold", telegramMessageCtx.MessageId, score);
             return null;
         }
 

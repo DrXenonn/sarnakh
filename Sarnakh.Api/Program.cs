@@ -118,6 +118,7 @@ try
     builder.Services.AddHostedService<RawDataReaderJob>();
     builder.Services.AddValidatorsFromAssemblyContaining<Program>();
     builder.Services.AddAutoMapper(typeof(TelegramMappingProfile));
+    builder.Services.AddMemoryCache();
 
     builder.Services.AddSingleton<TelegramBotClient>(sp =>
     {
