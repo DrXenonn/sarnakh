@@ -20,7 +20,7 @@ public class RegisterHandler
             return Results.ValidationProblem(validationResult.ToDictionary());
         }
 
-        using var transaction = await dbContext.Database.BeginTransactionAsync();
+        await using var transaction = await dbContext.Database.BeginTransactionAsync();
 
         var user = new ApplicationUser
         {

@@ -3,7 +3,9 @@ VALUES
 (
     gen_random_uuid(),
     '💄 زیبایی و مراقبت',
-    ARRAY[-1001239442326::bigint]
+    ARRAY[
+        -1001239442326::bigint
+    ]
 ),
 (
     gen_random_uuid(),
@@ -11,6 +13,14 @@ VALUES
     ARRAY[
         -1001285978456::bigint,
         -1003330885295::bigint
+    ]
+),
+(
+    gen_random_uuid(),
+    '🇩🇪 آوسبیلدونگ و زبان آلمانی',
+    ARRAY[
+        -1001237772736::bigint,
+        -1001377303640::bigint
     ]
 );
 

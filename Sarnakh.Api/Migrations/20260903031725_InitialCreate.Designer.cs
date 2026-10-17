@@ -14,7 +14,7 @@ using Sarnakh.Api.Data;
 namespace Sarnakh.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260827001030_InitialCreate")]
+    [Migration("20260903031725_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
